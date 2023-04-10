@@ -23,6 +23,13 @@ exports.PrepareIPFSInstance = async (req, res) => {
     return res.status(200).json({ dbCreated: true });
 };
 
+exports.getAllUsers = (req, res) => {
+    const curUsers = userDataDB.all;
+    const userData = Object.values(curUsers);
+
+    return res.status(200).json({ userData: userData });
+};
+
 exports.userRegister = async (req, res) => {
     const username = req.body.username;
     const email = req.body.email;
@@ -62,5 +69,7 @@ exports.userRegister = async (req, res) => {
 };
 
 exports.userLogin = (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
 
 };

@@ -15,6 +15,9 @@ const validationPostRequest = (keys) => {
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", user.PrepareIPFSInstance);
 
+// Admin: Get all users
+router.post("/admin/getAllUsers", user.getAllUsers)
+
 // User Register
 router.post("/users/register", validationPostRequest(["username", "email", "password"]), user.userRegister);
 
