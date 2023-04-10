@@ -1,0 +1,33 @@
+{
+  "name": "Upsocial Backend",
+  "version": "1.0.0",
+  "description": "This is Upsocial backend System",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "encrypt-string": "^1.0.0",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "https": "^1.0.0",
+    "ipfs": "^0.44.0",
+    "js-kubo-rpc-client": "^1.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "kubo-rpc-client": "^3.0.1",
+    "nodemon": "^2.0.20",
+    "orbit-db": "^0.24.1",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.0",
+    "web3": "^1.8.1"
+  },
+  "type": "commonjs"
+}
