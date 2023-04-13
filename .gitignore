@@ -3,7 +3,8 @@
 
 # production
 /build
-
+/UpsocialRepo
+/orbitdb
 # misc
 /.DS_Store
 /.env

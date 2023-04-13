@@ -13,7 +13,7 @@ const validationPostRequest = (keys) => {
 }
 
 // Admin: Create IPFS instance, and Orbit DB
-router.post("/admin/createDB", user.PrepareIPFSInstance);
+router.post("/admin/createDB", user.CreateDBs);
 
 // Admin: Get all users
 router.post("/admin/getAllUsers", user.getAllUsers)
@@ -23,5 +23,8 @@ router.post("/users/register", validationPostRequest(["username", "email", "pass
 
 // User Login
 router.post("/users/login", validationPostRequest(["email", "password"]), user.userLogin);
+
+// Upload Content
+router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl"]), user.uploadContent)
 
 module.exports = router;
