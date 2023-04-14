@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const user = require("../controller/user");
+const Controller = require("../controller/user");
 
 // middleware
 const validationPostRequest = (keys) => {
@@ -13,18 +13,21 @@ const validationPostRequest = (keys) => {
 }
 
 // Admin: Create IPFS instance, and Orbit DB
-router.post("/admin/createDB", user.CreateDBs);
+router.post("/admin/createDB", Controller.CreateDBs);
 
 // Admin: Get all users
-router.post("/admin/getAllUsers", user.getAllUsers)
+router.get("/admin/getAllUsers", Controller.getAllUsers)
 
 // User Register
-router.post("/users/register", validationPostRequest(["username", "email", "password"]), user.userRegister);
+router.post("/users/register", validationPostRequest(["username", "email", "password"]), Controller.userRegister);
 
 // User Login
-router.post("/users/login", validationPostRequest(["email", "password"]), user.userLogin);
+router.post("/users/login", validationPostRequest(["email", "password"]), Controller.userLogin);
 
 // Upload Content
-router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl"]), user.uploadContent)
+router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl"]), Controller.uploadContent)
+
+// Get Uploaded Content by Email
+router.post("/users/get/UploadedContent", validationPostRequest(["userEmail"]), Controller.UploadedContent);
 
 module.exports = router;

@@ -140,3 +140,16 @@ exports.uploadContent = async (req, res) => {
         return res.status(200).json({ status: true, msg: "Success !" });
     }
 };
+
+exports.UploadedContent = async (req, res) => {
+    const userEmail = req.body.userEmail;
+    if (contentDB.get(userEmail) != undefined) {
+        const allContents = contentDB.get(userEmail);
+        let curData = allContents.data;
+
+        return res.status(200).json({ status: true, msg: "success!", data: curData })
+
+    } else {
+        return res.status(200).json({ status: false, msg: "No Data", data: null });
+    }
+};
