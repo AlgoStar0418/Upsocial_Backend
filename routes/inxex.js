@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Controller = require("../controller/user");
+const Controller = require("../controller/Controller");
 
 // middleware
 const validationPostRequest = (keys) => {
@@ -24,10 +24,16 @@ router.post("/users/register", validationPostRequest(["username", "email", "pass
 // User Login
 router.post("/users/login", validationPostRequest(["email", "password"]), Controller.userLogin);
 
+// Set user status (Active and ban)
+router.post("/users/set/userStatus", validationPostRequest(["userEmail", "status"]), Controller.changeUserStatus);
+
 // Upload Content
-router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl"]), Controller.uploadContent)
+router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl", "thumbnail"]), Controller.uploadContent)
 
 // Get Uploaded Content by Email
-router.post("/users/get/UploadedContent", validationPostRequest(["userEmail"]), Controller.UploadedContent);
+router.post("/users/get/UploadedContent", validationPostRequest(["userEmail"]), Controller.GetUploadedContent);
+
+// Get Uploaded Content by Email
+router.get("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 
 module.exports = router;
