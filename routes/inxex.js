@@ -25,7 +25,10 @@ router.post("/users/register", validationPostRequest(["username", "email", "pass
 router.post("/users/login", validationPostRequest(["email", "password"]), Controller.userLogin);
 
 // Set user status (Active and ban)
-router.post("/users/set/userStatus", validationPostRequest(["userEmail", "status"]), Controller.changeUserStatus);
+router.post("/users/set/userStatus", Controller.changeUserStatus);
+
+// Set user's content status (Active and ban)
+router.post("/users/set/content/ChangeStatus", Controller.changeContentStatus);
 
 // Upload Content
 router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl", "thumbnail"]), Controller.uploadContent)
@@ -34,6 +37,6 @@ router.post("/users/content/uploadContent", validationPostRequest(["title", "des
 router.post("/users/get/UploadedContent", validationPostRequest(["userEmail"]), Controller.GetUploadedContent);
 
 // Get Uploaded Content by Email
-router.get("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
+router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 
 module.exports = router;

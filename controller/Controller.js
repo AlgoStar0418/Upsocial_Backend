@@ -10,22 +10,26 @@ let userDataDB; // User Profile Database
 let contentDB; // Content Management Database
 
 exports.CreateDBs = async (req, res) => {
-    ipfs = await IPFS.create({
-        EXPERIMENTAL: {
-            pubsub: true,
-        },
-        repo: "UpsocialRepo"
-    });
+    if (userDataDB == undefined && contentDB == undefined) {
+        ipfs = await IPFS.create({
+            EXPERIMENTAL: {
+                pubsub: true,
+            },
+            repo: "UpsocialRepo"
+        });
 
-    orbitdb = await OrbitDB.createInstance(ipfs, {});
+        orbitdb = await OrbitDB.createInstance(ipfs, {});
 
-    userDataDB = await orbitdb.kvstore("userDB", { overwrite: true });
-    await userDataDB.load();
+        userDataDB = await orbitdb.kvstore("userDB", { overwrite: true });
+        await userDataDB.load();
 
-    contentDB = await orbitdb.kvstore("contentDB", { overwrite: true });
-    await contentDB.load();
+        contentDB = await orbitdb.kvstore("contentDB", { overwrite: true });
+        await contentDB.load();
 
-    return res.status(200).json({ dbCreated: true });
+        return res.status(200).json({ dbCreated: true });
+    } else {
+        return res.status(200).json({ dbCreated: true });
+    }
 };
 
 exports.getAllUsers = (req, res) => {
@@ -129,6 +133,7 @@ exports.uploadContent = async (req, res) => {
     const userEmail = req.body.userEmail;
     const ipfsUrl = req.body.ipfsUrl;
     const thumbnail = req.body.thumbnail;
+    const status = true;
 
     let contentID = 0;
 
@@ -138,11 +143,11 @@ exports.uploadContent = async (req, res) => {
             const curContents = contentDB.all;
             contentID = Object.keys(curContents).length;
 
-            await contentDB.put(contentID, { email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: ipfsUrl, thumbnail: thumbnail });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: ipfsUrl, thumbnail: thumbnail, status: status });
             return res.status(200).json({ msg: `uploaded success`, status: true });
 
         } else {
-            await contentDB.put(contentID, { email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: ipfsUrl, thumbnail: thumbnail });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: ipfsUrl, thumbnail: thumbnail, status: status });
             return res.status(200).json({ msg: `uploaded success`, status: true });
         }
     } else {
@@ -177,6 +182,8 @@ exports.GetUploadedContent = async (req, res) => {
 };
 
 exports.GetAllUploadedContent = (req, res) => {
+    let start = 0;
+    let limit = req.body.limit;
     const contentId = 0;
     if (contentDB != undefined) {
 
@@ -184,8 +191,12 @@ exports.GetAllUploadedContent = (req, res) => {
             const allContents = contentDB.all;
             let contentsTable = Object.values(allContents);
 
-            return res.status(200).json({ status: true, msg: "success!", data: contentsTable })
-
+            if (limit > contentsTable.length) {
+                return res.status(200).json({ status: true, msg: "success!", data: contentsTable })
+            } else {
+                let resultDB = contentsTable.slice(start, limit);
+                return res.status(200).json({ status: true, msg: "success!", data: resultDB })
+            }
         } else {
             return res.status(200).json({ status: false, msg: "No Data", data: null });
         }
@@ -197,12 +208,10 @@ exports.GetAllUploadedContent = (req, res) => {
 exports.changeUserStatus = async (req, res) => {
     const userEmail = req.body.userEmail;
     const status = req.body.status;
-    console.log("start", userEmail, status);
     let userId = 0;
     if (userDataDB != undefined) {
 
         if (userDataDB.get(userId) != undefined) {
-            console.log("userdatadb is exist !");
 
             const curUsers = userDataDB.all;
 
@@ -213,7 +222,6 @@ exports.changeUserStatus = async (req, res) => {
             let password;
 
             for (var i = 0; i < userTable.length; i++) {
-                console.log(userTable[i]["email"], "====", userEmail);
                 if (userTable[i]["email"] == userEmail) {
                     userId = i;
                     username = userTable[i]["username"];
@@ -225,7 +233,6 @@ exports.changeUserStatus = async (req, res) => {
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
-                console.log(userId, username, password, status, "*******************");
                 await userDataDB.set(userId, { username: username, email: userEmail, password: password, status: status });
                 return res.status(200).json({ msg: `Success!`, status: true });
             }
@@ -236,4 +243,27 @@ exports.changeUserStatus = async (req, res) => {
     } else {
         return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
     }
+};
+
+exports.changeContentStatus = async (req, res) => {
+    const userEmail = req.body.userEmail;
+    const contentID = req.body.Id;
+    const status = req.body.status;
+
+    if (contentDB != undefined) {
+
+        if (contentDB.get(contentID) != undefined) {
+            const data = contentDB.get(contentID);
+
+            await contentDB.set(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: status });
+
+            return res.status(200).json({ status: true, msg: "success!", data: data })
+
+        } else {
+            return res.status(200).json({ status: false, msg: "No Data", data: null });
+        }
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+    }
+
 };
