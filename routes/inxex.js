@@ -1,6 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const Controller = require("../controller/Controller");
+const multer = require("multer");
+
+// file upload
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "downloads")
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.mp4')
+    }
+});
+
+var upload = multer({ storage: storage });
 
 // middleware
 const validationPostRequest = (keys) => {
@@ -38,5 +51,8 @@ router.post("/users/get/UploadedContent", validationPostRequest(["userEmail"]), 
 
 // Get Uploaded Content by Email
 router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
+
+// Upload Videos
+router.post("/upload/generate-ipfs", upload.single('video'), Controller.generateIPFS);
 
 module.exports = router;

@@ -1,6 +1,10 @@
+require('dotenv').config();
 const OrbitDB = require("orbit-db");
+const axios = require('axios');
 const IPFS = require("ipfs");
-
+const { exec } = require('node:child_process');
+const fs = require('fs');
+const filesize = require("file-size");
 
 let ipfs;
 let orbitdb;
@@ -8,6 +12,11 @@ let orbitdb;
 
 let userDataDB; // User Profile Database
 let contentDB; // Content Management Database
+
+let hashHistories = [];
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 exports.CreateDBs = async (req, res) => {
     if (userDataDB == undefined && contentDB == undefined) {
@@ -32,6 +41,9 @@ exports.CreateDBs = async (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.getAllUsers = (req, res) => {
     if (userDataDB != undefined) {
         const curUsers = userDataDB.all;
@@ -42,6 +54,9 @@ exports.getAllUsers = (req, res) => {
         return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", userData: null });
     }
 };
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 exports.userRegister = async (req, res) => {
 
@@ -88,6 +103,9 @@ exports.userRegister = async (req, res) => {
 
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.userLogin = (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
@@ -125,6 +143,9 @@ exports.userLogin = (req, res) => {
 
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.uploadContent = async (req, res) => {
     const title = req.body.title;
     const description = req.body.description;
@@ -155,6 +176,9 @@ exports.uploadContent = async (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.GetUploadedContent = async (req, res) => {
     const userEmail = req.body.userEmail;
     const contentId = 0;
@@ -181,6 +205,9 @@ exports.GetUploadedContent = async (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.GetAllUploadedContent = (req, res) => {
     let start = 0;
     let limit = req.body.limit;
@@ -204,6 +231,9 @@ exports.GetAllUploadedContent = (req, res) => {
         return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
     }
 };
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 exports.changeUserStatus = async (req, res) => {
     const userEmail = req.body.userEmail;
@@ -245,6 +275,9 @@ exports.changeUserStatus = async (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.changeContentStatus = async (req, res) => {
     const userEmail = req.body.userEmail;
     const contentID = req.body.Id;
@@ -267,3 +300,212 @@ exports.changeContentStatus = async (req, res) => {
     }
 
 };
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.generateIPFS = async (req, res) => {
+    const { url, timestamp, email } = req.body;
+    const { file } = req;
+    const ip = req.headers['x-real-ip'] || '';
+
+    let histories = [];
+    for (let i = 0; i < hashHistories.length; i++) {
+        const jsonData = await axios({
+            method: 'get',
+            url: `${process.env.IPFS_BASE_URL}/${hashHistories[i].jsonHashCode}`
+        });
+        if (jsonData && jsonData.data) {
+            histories.push(jsonData.data);
+        }
+    }
+
+    if (file) {
+        console.log('ipfs add ==========>', `ipfs add ./downloads/${file.filename}`);
+        const addVideoProcess = exec(`ipfs add ./downloads/${file.filename}`);
+
+        addVideoProcess.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                const stats = await fs.statSync(`./downloads/${file.filename}`);
+                const size = filesize(stats.size).human('si');
+                const data = {
+                    filename: file.filename,
+                    sourceType: 'file',
+                    createdAt: (Date.now()).toString(),
+                    ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                    hashCode: hashCode,
+                    size: size,
+                    ip,
+                    email
+                }
+                saveHistory(data);
+                return res.json({
+                    result: true,
+                    data: data
+                });
+            }
+        });
+    } else {
+        console.log('start downloading =========>', url, timestamp);
+        let type = 'youtube';
+        let videoId = '';
+        if (url.indexOf('vimeo') >= 0) {
+            type = 'vimeo';
+        }
+        if (type === 'youtube') {
+            videoId = youtube_parser(url);
+        } else {
+            videoId = vimeo_parser(url);
+        }
+
+        console.log('prepare download =========>', `yt-dlp -o ./downloads/${videoId}.mp4 "${url}" -f "mp4"`);
+        const downloadProcess = exec(`yt-dlp -o ./downloads/${videoId}.mp4 "${url}" -f "mp4"`);
+        downloadProcess.stderr.on('data', function (err) {
+            if (err && err.includes('WARNING') < 0) {
+                console.log('download error =========>', err);
+                return res.json({
+                    result: false,
+                    error: err
+                });
+            }
+        });
+        downloadProcess.stdout.on('data', async function (data) {
+            console.log('downloading =========>', data, converting);
+            if (data && data.indexOf('has already been downloaded') >= 0) {
+                console.log('download success 222 **********>' + `${videoId}.mp4`);
+                setTimeout(async () => {
+                    const addProcess = exec(`ipfs add ./downloads/${videoId}.mp4`);
+
+                    addProcess.stdout.on('data', async function (data1) {
+                        if (data1 && data1.indexOf('added') >= 0) {
+                            const hashCode = data1.split(' ')[1];
+                            const stats = await fs.statSync(`./downloads/${videoId}.mp4`);
+                            const size = filesize(stats.size).human('si');
+                            const data = {
+                                filename: `${videoId}.mp4`,
+                                sourceType: type,
+                                url: url,
+                                createdAt: (Date.now()).toString(),
+                                ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                                size: size,
+                                hashCode: hashCode,
+                                ip,
+                                email
+                            }
+                            saveHistory(data);
+                            return res.json({
+                                result: true,
+                                data: data
+                            });
+                        }
+                    });
+                }, 500);
+            }
+
+            const percentPos = data.indexOf("%");
+            if (percentPos > 7) {
+                const percent = data.slice(percentPos - 6, percentPos);
+                const index = converting.findIndex((item) => item && item.timestamp === timestamp);
+                if (index >= 0) {
+                    converting[index].percent = percent;
+
+                    if (data.indexOf('100%') >= 0) {
+                        console.log('download success **********>', converting[index]);
+                        converting[index].percent = '100';
+                        converting[index].status = 'uploading';
+                        setTimeout(async () => {
+                            const addProcess = exec(`ipfs add ./downloads/${videoId}.mp4`);
+
+                            addProcess.stdout.on('data', async function (data1) {
+                                if (data1 && data1.indexOf('added') >= 0) {
+                                    const hashCode = data1.split(' ')[1];
+                                    const stats = await fs.statSync(`./downloads/${videoId}.mp4`);
+                                    const size = filesize(stats.size).human('si');
+                                    const data = {
+                                        filename: `${videoId}.mp4`,
+                                        sourceType: type,
+                                        url: url,
+                                        createdAt: (Date.now()).toString(),
+                                        ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                                        size: size,
+                                        ip,
+                                        hashCode: hashCode,
+                                        email
+                                    }
+                                    saveHistory(data);
+                                    return res.json({
+                                        result: true,
+                                        data: data
+                                    });
+                                }
+                            });
+                        }, 500);
+                    }
+                } else {
+                    converting.push({
+                        timestamp,
+                        url,
+                        percent: 0,
+                        status: 'downloading'
+                    });
+                }
+            }
+        });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+function saveHistory(history) {
+    const filename = history.filename.replace('.mp4', '.json');
+    fs.writeFile(`./downloads/${filename}`, JSON.stringify(history), 'utf8', function (err, data) {
+        if (err) {
+            console.log('save history error ======>', err);
+        }
+
+        const addJsonProcess = exec(`ipfs add ./downloads/${filename}`);
+
+        addJsonProcess.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                hashHistories.push({
+                    hashCode: history.hashCode,
+                    jsonHashCode: hashCode
+                });
+                let h = new History();
+                h.filename = history.filename;
+                h.sourceType = history.sourceType;
+                h.url = history.url;
+                h.ipfsUrl = history.ipfsUrl;
+                h.size = history.size;
+                h.createdAt = history.createdAt;
+                h.ip = history.ip;
+                h.hashCode = history.hashCode;
+                h.jsonHashCode = hashCode;
+                h.email = history.email;
+                h.save();
+            }
+        });
+    });
+}
+
+function youtube_parser(url) {
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    var match = url.match(regExp);
+    return (match && match[7].length == 11) ? match[7] : false;
+}
+
+function vimeo_parser(url) {
+    // Look for a string with 'vimeo', then whatever, then a
+    // forward slash and a group of digits.
+    var match = /vimeo.*\/(\d+)/i.exec(url);
+
+    // If the match isn't null (i.e. it matched)
+    if (match) {
+        // The grouped/matched digits from the regex
+        return match[1];
+    }
+    return false;
+}
