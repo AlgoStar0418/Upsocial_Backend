@@ -60,6 +60,43 @@ exports.getAllUsers = (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+exports.getUsersByEmail = async (req, res) => {
+    const userEmail = req.body.userEmail;
+    let userId = 0;
+    if (userDataDB != undefined) {
+
+        if (userDataDB.get(userId) != undefined) {
+
+            const curUsers = userDataDB.all;
+
+            let userTable = Object.values(curUsers);
+
+            let userExist = false;
+            let result;
+
+            for (var i = 0; i < userTable.length; i++) {
+                if (userTable[i]["email"] == userEmail) {
+                    result = userTable[i];
+                    userExist = true;
+                }
+            }
+
+            if (!userExist) {
+                return res.status(200).json({ msg: `User is not registered!`, status: false });
+            } else {
+                return res.status(200).json({ msg: `Success!`, status: true, data: result });
+            }
+        } else {
+            return res.status(200).json({ msg: `You are not registered!`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.userRegister = async (req, res) => {
 
     const username = req.body.username;

@@ -31,7 +31,10 @@ var uploadPhoto = multer({ storage: photoStorage });
 router.post("/admin/createDB", Controller.CreateDBs);
 
 // Admin: Get all users
-router.get("/admin/getAllUsers", Controller.getAllUsers)
+router.get("/admin/getAllUsers", Controller.getAllUsers);
+
+// Get user Profile by email
+router.get("/admin/getUsers", Controller.getUsersByEmail);
 
 // User Register
 router.post("/users/register", Controller.userRegister);
@@ -51,7 +54,7 @@ router.post("/users/content/uploadContent", Controller.uploadContent)
 // Get Uploaded Content by Email
 router.post("/users/get/UploadedContent", Controller.GetUploadedContent);
 
-// Get Uploaded Content by Email
+// Get All Uploaded Content
 router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 
 // Upload Videos
