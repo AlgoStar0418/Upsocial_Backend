@@ -608,7 +608,7 @@ exports.uploadPhoto = async (req, res) => {
                         if (!userExist) {
                             return res.status(200).json({ msg: `User is not registered!`, status: false });
                         } else {
-                            await userDataDB.set(userId, { username: name, email: userEmail, password: password, status: status, handle: handle, description: description, location: location, photo: hashCode });
+                            await userDataDB.set(userId, { username: name, email: userEmail, password: password, status: status, handle: handle, description: description, location: location, photo: data.ipfsUrl });
                             return res.status(200).json({ msg: `Success!`, status: true, data: data });
                         }
 
