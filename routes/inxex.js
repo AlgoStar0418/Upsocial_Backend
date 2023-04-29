@@ -13,7 +13,19 @@ var storage = multer.diskStorage({
     }
 });
 
-var upload = multer({ storage: storage });
+var uploadVideo = multer({ storage: storage });
+
+// photo upload
+var photoStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "photos")
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.jpg');
+    }
+});
+
+var uploadPhoto = multer({ storage: photoStorage });
 
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
@@ -43,9 +55,9 @@ router.post("/users/get/UploadedContent", Controller.GetUploadedContent);
 router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 
 // Upload Videos
-router.post("/upload/generate-ipfs", upload.single('video'), Controller.generateIPFS);
+router.post("/upload/generate-ipfs", uploadVideo.single('video'), Controller.generateIPFS);
 
 // Upload Profile Photo
-router.post("/upload/photo", upload.single("photo"), Controller.uploadPhoto)
+router.post("/upload/photo", uploadPhoto.single("photo"), Controller.uploadPhoto)
 
 module.exports = router;

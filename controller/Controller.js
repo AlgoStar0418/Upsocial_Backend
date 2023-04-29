@@ -523,9 +523,7 @@ function vimeo_parser(url) {
 exports.uploadPhoto = async (req, res) => {
     const { file } = req;
     const { name, handle, description, location, userEmail } = req.body;
-
-    console.log(req.body);
-
+    let data;
     if (file) {
         const addPhotoProcess = exec(`ipfs add ./downloads/${file.filename}`);
 
@@ -534,7 +532,7 @@ exports.uploadPhoto = async (req, res) => {
                 const hashCode = result.split(' ')[1];
                 const stats = await fs.statSync(`./downloads/${file.filename}`);
                 const size = filesize(stats.size).human('si');
-                const data = {
+                data = {
                     filename: file.filename,
                     sourceType: 'file',
                     createdAt: (Date.now()).toString(),
@@ -543,11 +541,53 @@ exports.uploadPhoto = async (req, res) => {
                     size: size,
                 }
 
-                return res.json({
-                    result: true,
-                    data: data
-                });
+                // return res.json({
+                //     result: true,
+                //     data: data
+                // });
             }
+        });
+
+
+        let userId = 0;
+        if (userDataDB != undefined) {
+
+            if (userDataDB.get(userId) != undefined) {
+
+                const curUsers = userDataDB.all;
+
+                let userTable = Object.values(curUsers);
+
+                let userExist = false;
+                let password;
+                let status;
+
+                for (var i = 0; i < userTable.length; i++) {
+                    if (userTable[i]["email"] == userEmail) {
+                        userId = i;
+                        status = userTable[i]["status"];
+                        password = userTable[i]["password"];
+                        userExist = true;
+                    }
+                }
+
+                if (!userExist) {
+                    return res.status(200).json({ msg: `User is not registered!`, status: false });
+                } else {
+                    await userDataDB.set(userId, { username: name, email: userEmail, password: password, status: status, handle: handle, description: description, location: location });
+                    return res.status(200).json({ msg: `Success!`, status: true, data: data });
+                }
+
+            } else {
+                return res.status(200).json({ msg: `Saving your profile is change!`, status: false });
+            }
+        } else {
+            return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        }
+    } else {
+        return res.json({
+            result: false,
+            data: "No photo file"
         });
     }
 }
