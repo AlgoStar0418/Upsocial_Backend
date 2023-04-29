@@ -27,6 +27,19 @@ var photoStorage = multer.diskStorage({
 
 var uploadPhoto = multer({ storage: photoStorage });
 
+// Thumbnail upload
+var thumbnailStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "thumbnail")
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.jpg');
+    }
+});
+
+var uploadThumbnail = multer({ storage: thumbnailStorage });
+
+
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
 
@@ -49,7 +62,10 @@ router.post("/users/set/userStatus", Controller.changeUserStatus);
 router.post("/users/set/content/ChangeStatus", Controller.changeContentStatus);
 
 // Upload Content
-router.post("/users/content/uploadContent", Controller.uploadContent)
+router.post("/users/content/uploadContent", Controller.uploadContent);
+
+// Upload Content in Web
+router.post("/users/content/web/uploadContent", uploadThumbnail.single('thumbnail'), Controller.Web_uploadContent);
 
 // Get Uploaded Content by Email
 router.post("/users/get/UploadedContent", Controller.GetUploadedContent);

@@ -225,6 +225,59 @@ exports.uploadContent = async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+exports.Web_uploadContent = (req, res) => {
+    const { file } = req;
+    const { title, description, keywords, category, userEmail, video_src } = req.body;
+
+    if (file) {
+        const addThumbnailProcess = exec(`ipfs add ./thumbnail/${file.filename}`);
+
+        addThumbnailProcess.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                const stats = await fs.statSync(`./thumbnail/${file.filename}`);
+                const size = filesize(stats.size).human('si');
+                const data = {
+                    filename: file.filename,
+                    sourceType: 'file',
+                    createdAt: (Date.now()).toString(),
+                    ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                    hashCode: hashCode,
+                    size: size,
+                }
+
+                let contentID = 0;
+                const status = true;
+
+                if (contentDB != undefined) {
+
+                    if (contentDB.get(contentID) != undefined) {
+                        const curContents = contentDB.all;
+                        contentID = Object.keys(curContents).length;
+
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status });
+                        return res.status(200).json({ msg: `uploaded success`, status: true });
+
+                    } else {
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status });
+                        return res.status(200).json({ msg: `uploaded success`, status: true });
+                    }
+                } else {
+                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+                }
+            }
+        });
+    } else {
+        return res.json({
+            result: false,
+            data: "No Thumbnail file"
+        });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.GetUploadedContent = async (req, res) => {
     const userEmail = req.body.userEmail;
     const contentId = 0;
@@ -577,12 +630,6 @@ exports.uploadPhoto = async (req, res) => {
                     hashCode: hashCode,
                     size: size,
                 }
-
-                // return res.json({
-                //     result: true,
-                //     data: data
-                // });
-
                 let userId = 0;
                 if (userDataDB != undefined) {
 
