@@ -522,6 +522,9 @@ function vimeo_parser(url) {
 
 exports.uploadPhoto = async (req, res) => {
     const { file } = req;
+    const { name, handle, description, location, userEmail } = req.body;
+
+    console.log(req.body);
 
     if (file) {
         const addPhotoProcess = exec(`ipfs add ./downloads/${file.filename}`);

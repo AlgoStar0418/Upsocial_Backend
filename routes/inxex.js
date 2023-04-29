@@ -45,4 +45,7 @@ router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 // Upload Videos
 router.post("/upload/generate-ipfs", upload.single('video'), Controller.generateIPFS);
 
+// Upload Profile Photo
+router.post("/upload/photo", upload.single("photo"), Controller.uploadPhoto)
+
 module.exports = router;
