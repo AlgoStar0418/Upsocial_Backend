@@ -525,12 +525,12 @@ exports.uploadPhoto = async (req, res) => {
     const { name, handle, description, location, userEmail } = req.body;
     let data;
     if (file) {
-        const addPhotoProcess = exec(`ipfs add ./downloads/${file.filename}`);
+        const addPhotoProcess = exec(`ipfs add ./photos/${file.filename}`);
 
         addPhotoProcess.stdout.on('data', async function (result) {
             if (result && result.indexOf('added') >= 0) {
                 const hashCode = result.split(' ')[1];
-                const stats = await fs.statSync(`./downloads/${file.filename}`);
+                const stats = await fs.statSync(`./photos/${file.filename}`);
                 const size = filesize(stats.size).human('si');
                 data = {
                     filename: file.filename,
