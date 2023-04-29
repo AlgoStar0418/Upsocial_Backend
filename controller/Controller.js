@@ -5,6 +5,7 @@ const IPFS = require("ipfs");
 const { exec } = require('node:child_process');
 const fs = require('fs');
 const filesize = require("file-size");
+const { encryptString, decryptString } = require('encrypt-string');
 
 let ipfs;
 let orbitdb;
@@ -15,6 +16,7 @@ let contentDB; // Content Management Database
 
 let hashHistories = [];
 
+let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
@@ -64,6 +66,8 @@ exports.userRegister = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
+    const encrypted_password = await encryptString(password, ENCRYPT_PASS);
+
     let userId = 0;
 
     if (userDataDB != undefined) {
@@ -86,7 +90,7 @@ exports.userRegister = async (req, res) => {
             }
 
             if (!userExist) {
-                await userDataDB.put(userId, { username: username, email: email, password: password, status: true });
+                await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true });
                 return res.status(200).json({ msg: `${email} is registered success !`, status: true });
             } else {
                 return res.status(200).json({ msg: `${email} is already registered !`, status: false });
@@ -94,7 +98,7 @@ exports.userRegister = async (req, res) => {
 
 
         } else {
-            await userDataDB.put(userId, { username: username, email: email, password: password, status: true });
+            await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true });
             return res.status(200).json({ msg: `${email} is registered success !`, status: true });
         }
     } else {
@@ -106,7 +110,7 @@ exports.userRegister = async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
-exports.userLogin = (req, res) => {
+exports.userLogin = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
@@ -123,8 +127,13 @@ exports.userLogin = (req, res) => {
             let userAuth = false;
 
             for (var i = 0; i < userTable.length; i++) {
-                if (userTable[i]["email"] == email && userTable[i]["password"] == password && userTable[i]["status"]) {
-                    userAuth = true;
+                if (userTable[i]["email"] == email && userTable[i]["status"]) {
+                    const decrypted_password = await decryptString(userTable[i]["password"], ENCRYPT_PASS);
+                    if (decrypted_password == password) {
+                        userAuth = true;
+                    } else {
+                        userAuth = false;
+                    }
                 }
             }
 
@@ -508,4 +517,34 @@ function vimeo_parser(url) {
         return match[1];
     }
     return false;
+}
+
+
+exports.uploadPhoto = async (req, res) => {
+    const { file } = req;
+
+    if (file) {
+        const addPhotoProcess = exec(`ipfs add ./downloads/${file.filename}`);
+
+        addPhotoProcess.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                const stats = await fs.statSync(`./downloads/${file.filename}`);
+                const size = filesize(stats.size).human('si');
+                const data = {
+                    filename: file.filename,
+                    sourceType: 'file',
+                    createdAt: (Date.now()).toString(),
+                    ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                    hashCode: hashCode,
+                    size: size,
+                }
+
+                return res.json({
+                    result: true,
+                    data: data
+                });
+            }
+        });
+    }
 }

@@ -15,16 +15,6 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage: storage });
 
-// middleware
-const validationPostRequest = (keys) => {
-    return function (req, res, next) {
-        keys.forEach(key => {
-            if (!req.body[key]) res.status(404).json({ message: `Not found ${key} field!` });
-        });
-        next();
-    }
-}
-
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
 
@@ -32,10 +22,10 @@ router.post("/admin/createDB", Controller.CreateDBs);
 router.get("/admin/getAllUsers", Controller.getAllUsers)
 
 // User Register
-router.post("/users/register", validationPostRequest(["username", "email", "password"]), Controller.userRegister);
+router.post("/users/register", Controller.userRegister);
 
 // User Login
-router.post("/users/login", validationPostRequest(["email", "password"]), Controller.userLogin);
+router.post("/users/login", Controller.userLogin);
 
 // Set user status (Active and ban)
 router.post("/users/set/userStatus", Controller.changeUserStatus);
@@ -44,10 +34,10 @@ router.post("/users/set/userStatus", Controller.changeUserStatus);
 router.post("/users/set/content/ChangeStatus", Controller.changeContentStatus);
 
 // Upload Content
-router.post("/users/content/uploadContent", validationPostRequest(["title", "description", "keyword", "category", "userEmail", "ipfsUrl", "thumbnail"]), Controller.uploadContent)
+router.post("/users/content/uploadContent", Controller.uploadContent)
 
 // Get Uploaded Content by Email
-router.post("/users/get/UploadedContent", validationPostRequest(["userEmail"]), Controller.GetUploadedContent);
+router.post("/users/get/UploadedContent", Controller.GetUploadedContent);
 
 // Get Uploaded Content by Email
 router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
