@@ -34,7 +34,7 @@ router.post("/admin/createDB", Controller.CreateDBs);
 router.get("/admin/getAllUsers", Controller.getAllUsers);
 
 // Get user Profile by email
-router.get("/admin/getUsers", Controller.getUsersByEmail);
+router.post("/admin/getUsers", Controller.getUsersByEmail);
 
 // User Register
 router.post("/users/register", Controller.userRegister);
