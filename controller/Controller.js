@@ -210,11 +210,11 @@ exports.uploadContent = async (req, res) => {
             const curContents = contentDB.all;
             contentID = Object.keys(curContents).length;
 
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: ipfsUrl, thumbnail: thumbnail, status: status });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
             return res.status(200).json({ msg: `uploaded success`, status: true });
 
         } else {
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: ipfsUrl, thumbnail: thumbnail, status: status });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
             return res.status(200).json({ msg: `uploaded success`, status: true });
         }
     } else {
@@ -255,11 +255,11 @@ exports.Web_uploadContent = (req, res) => {
                         const curContents = contentDB.all;
                         contentID = Object.keys(curContents).length;
 
-                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
 
                     } else {
-                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
                     }
                 } else {
@@ -275,7 +275,9 @@ exports.Web_uploadContent = (req, res) => {
     }
 };
 
-/////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
 exports.GetUploadedContent = async (req, res) => {
@@ -387,7 +389,7 @@ exports.changeContentStatus = async (req, res) => {
         if (contentDB.get(contentID) != undefined) {
             const data = contentDB.get(contentID);
 
-            await contentDB.set(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: status });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: status, liked: data.liked, disliked: data.disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
 
             return res.status(200).json({ status: true, msg: "success!", data: data })
 
