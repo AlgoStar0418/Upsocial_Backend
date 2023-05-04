@@ -341,7 +341,7 @@ exports.GetUploadedContentByCategory = (req, res) => {
 
     var targetCategory = items.find(item => item.name == categoryName);
     var targetID;
-    if (chek == undefined) {
+    if (targetCategory == undefined) {
         console.log("Not present")
         return res.json({ msg: "Not present", status: false })
     } else {
