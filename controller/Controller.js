@@ -7,6 +7,33 @@ const fs = require('fs');
 const filesize = require("file-size");
 const { encryptString, decryptString } = require('encrypt-string');
 
+const items = [
+    { id: 1, name: 'Animation' },
+    { id: 2, name: 'Autos & Vehicles' },
+    { id: 3, name: 'Beauty & Fashion' },
+    { id: 4, name: 'Comedy' },
+    { id: 5, name: 'Cooking & Food' },
+    { id: 6, name: 'DIY & Crafts' },
+    { id: 7, name: 'Documentary' },
+    { id: 8, name: 'Education' },
+    { id: 9, name: 'Entertainment' },
+    { id: 10, name: 'Film & Animation' },
+    { id: 11, name: 'Gaming' },
+    { id: 12, name: 'Health & Fitness' },
+    { id: 13, name: 'How-to & Style' },
+    { id: 14, name: 'Kids & Family' },
+    { id: 15, name: 'Music' },
+    { id: 16, name: 'News & Politics' },
+    { id: 17, name: 'Nonprofits & Activism' },
+    { id: 18, name: 'People & Blogs' },
+    { id: 19, name: 'Pets & Animals' },
+    { id: 20, name: 'Science & Technology' },
+    { id: 21, name: 'Sports' },
+    { id: 22, name: 'Travel & Events' },
+    { id: 23, name: 'Unboxing & Reviews' },
+    { id: 24, name: 'Blogs' },
+];
+
 let ipfs;
 let orbitdb;
 
@@ -309,6 +336,45 @@ exports.GetUploadedContent = async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+exports.GetUploadedContentByCategory = (req, res) => {
+    const categoryName = req.body.categoryName;
+
+    var targetCategory = items.find(item => item.name == categoryName);
+    var targetID;
+    if (chek == undefined) {
+        console.log("Not present")
+        return res.json({ msg: "Not present", status: false })
+    } else {
+        targetID = targetCategory.id
+    }
+
+    const contentId = 0;
+    if (contentDB != undefined) {
+
+        if (contentDB.get(contentId) != undefined) {
+            const allContents = contentDB.all;
+            let contentsTable = Object.values(allContents);
+            let resultVideos = [];
+
+            for (var i = 0; i < contentsTable.length; i++) {
+                if (contentsTable[i]["category"].includes(targetID)) {
+                    resultVideos.push(contentsTable[i]);
+                }
+            }
+            return res.status(200).json({ status: true, msg: "success!", data: resultVideos })
+
+        } else {
+            return res.status(200).json({ status: false, msg: "No Data", data: null });
+        }
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+    }
+
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.GetAllUploadedContent = (req, res) => {
     let start = 0;
     let limit = req.body.limit;
@@ -558,7 +624,7 @@ exports.generateIPFS = async (req, res) => {
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////// Save History ////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
+
 function saveHistory(history) {
     const filename = history.filename.replace('.mp4', '.json');
     fs.writeFile(`./downloads/${filename}`, JSON.stringify(history), 'utf8', function (err, data) {
@@ -592,11 +658,17 @@ function saveHistory(history) {
     });
 }
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
 function youtube_parser(url) {
     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
     var match = url.match(regExp);
     return (match && match[7].length == 11) ? match[7] : false;
 }
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
 
 function vimeo_parser(url) {
     // Look for a string with 'vimeo', then whatever, then a
@@ -611,6 +683,8 @@ function vimeo_parser(url) {
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
 
 exports.uploadPhoto = async (req, res) => {
     const { file } = req;

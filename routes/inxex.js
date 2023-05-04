@@ -70,6 +70,9 @@ router.post("/users/content/web/uploadContent", uploadThumbnail.single('thumbnai
 // Get Uploaded Content by Email
 router.post("/users/get/UploadedContent", Controller.GetUploadedContent);
 
+// Get Uploaded Content by Category
+router.post("/users/get/UploadedContent/Category", Controller.GetUploadedContentByCategory)
+
 // Get All Uploaded Content
 router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 
