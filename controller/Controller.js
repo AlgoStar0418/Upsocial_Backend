@@ -806,7 +806,7 @@ exports.createChannel = async (req, res) => {
 
                     } else {
                         await channelDB.set(0, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
-                        return res.status(200).json({ msg: `Channel creation is successful!`, status: false });
+                        return res.status(200).json({ msg: `Channel creation is successful!`, status: true });
                     }
                 } else {
                     return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
@@ -818,5 +818,19 @@ exports.createChannel = async (req, res) => {
             result: false,
             data: "No photo file"
         });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.getAllChannels = (req, res) => {
+    if (channelDB != undefined) {
+        const curChannels = channelDB.all;
+        const channelData = Object.values(curChannels);
+
+        return res.status(200).json({ channelData: channelData });
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
     }
 };

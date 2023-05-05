@@ -85,4 +85,7 @@ router.post("/upload/photo", uploadPhoto.single("photo"), Controller.uploadPhoto
 // create channel
 router.post("/create/channel", uploadPhoto.single("photo"), Controller.createChannel);
 
+// get all channels
+router.post("/getAll/channels", Controller.getAllChannels);
+
 module.exports = router;
