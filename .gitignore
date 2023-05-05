@@ -5,6 +5,9 @@
 /build
 /UpsocialRepo
 /orbitdb
+/downloads
+/photos
+/thumbnail
 # misc
 /.DS_Store
 /.env.development.local
