@@ -800,11 +800,12 @@ exports.createChannel = async (req, res) => {
                         } else {
                             let id = channelTable.length;
 
-                            await userDataDB.set(id, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
+                            await channelDB.set(id, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
                             return res.status(200).json({ msg: `Creating channel is success!`, status: true });
                         }
 
                     } else {
+                        await channelDB.set(0, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
                         return res.status(200).json({ msg: `Channel creation is successful!`, status: false });
                     }
                 } else {
