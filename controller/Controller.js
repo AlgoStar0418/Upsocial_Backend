@@ -879,9 +879,9 @@ exports.followChannel = async (req, res) => {
             const allChannels = channelDB.all;
             const channelData = Object.values(allChannels);
             let channelExist = false;
-            let result = {};
-            let curFollowers = [];
-            let curContents = [];
+            let result;
+            let curFollowers;
+            let curContents;
             let id;
 
             for (var i = 0; i < channelData.length; i++) {
