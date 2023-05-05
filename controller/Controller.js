@@ -1023,10 +1023,26 @@ exports.uploadContentsChannel = async (req, res) => {
                         let id;
                         let targetContents;
 
+                        let channelName;
+                        let handleUrl;
+                        let aboutChannel;
+                        let tags;
+                        let location;
+                        let url;
+                        let photo;
+
                         for (var i = 0; i < channelData.length; i++) {
                             if (channelData[i]["email"] == channelAdmin) {
                                 id = i;
                                 channelExist = true;
+
+                                channelName = channelData[i]["channelName"];
+                                handleUrl = channelData[i]["handleUrl"];
+                                aboutChannel = channelData[i]["aboutChannel"];
+                                tags = channelData[i]["tags"];
+                                location = channelData[i]["location"];
+                                url = channelData[i]["url"];
+                                photo = channelData[i]["photo"];
                                 curFollowers = channelData[i]["followers"];
                                 curContents = channelData[i]["contents"];
                             }
@@ -1056,7 +1072,7 @@ exports.uploadContentsChannel = async (req, res) => {
                         if (channelExist) {
                             await channelDB.set(id, {
                                 channelName: channelName,
-                                email: userEmail,
+                                email: channelAdmin,
                                 handleUrl: handleUrl,
                                 aboutChannel: aboutChannel,
                                 tags: tags,
