@@ -80,6 +80,9 @@ router.post("/users/getAll/UploadedContent", Controller.GetAllUploadedContent);
 router.post("/upload/generate-ipfs", uploadVideo.single('video'), Controller.generateIPFS);
 
 // Upload Profile Photo
-router.post("/upload/photo", uploadPhoto.single("photo"), Controller.uploadPhoto)
+router.post("/upload/photo", uploadPhoto.single("photo"), Controller.uploadPhoto);
+
+// create channel
+router.post("/create/channel", uploadPhoto.single("photo"), Controller.createChannel);
 
 module.exports = router;

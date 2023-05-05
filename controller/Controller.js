@@ -40,6 +40,7 @@ let orbitdb;
 
 let userDataDB; // User Profile Database
 let contentDB; // Content Management Database
+let channelDB; // Channel Management Database
 
 let hashHistories = [];
 
@@ -63,6 +64,9 @@ exports.CreateDBs = async (req, res) => {
 
         contentDB = await orbitdb.kvstore("contentDB", { overwrite: true });
         await contentDB.load();
+
+        channelDB = await orbitdb.kvstore("channelDB", { overwrite: true });
+        await channelDB.load();
 
         return res.status(200).json({ dbCreated: true });
     } else {
@@ -750,3 +754,68 @@ exports.uploadPhoto = async (req, res) => {
         });
     }
 }
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.createChannel = async (req, res) => {
+    const { file } = req;
+    const { channelName, handleUrl, aboutChannel, location, tags, url, userEmail } = req.body;
+
+    if (file) {
+        const addPhotoProcess = exec(`ipfs add ./photos/${file.filename}`);
+
+        addPhotoProcess.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                const stats = await fs.statSync(`./photos/${file.filename}`);
+                const size = filesize(stats.size).human('si');
+                const data = {
+                    filename: file.filename,
+                    sourceType: 'file',
+                    createdAt: (Date.now()).toString(),
+                    ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                    hashCode: hashCode,
+                    size: size,
+                }
+                let channelId = 0;
+                if (channelDB != undefined) {
+
+                    if (channelDB.get(channelId) != undefined) {
+
+                        const curChannels = channelDB.all;
+
+                        let channelTable = Object.values(curChannels);
+
+                        let channelExist = false;
+
+                        for (var i = 0; i < channelTable.length; i++) {
+                            if (channelTable[i]["email"] == userEmail) {
+                                channelExist = true;
+                            }
+                        }
+
+                        if (channelExist) {
+                            return res.status(200).json({ msg: `You already created channel!`, status: false });
+                        } else {
+                            let id = channelTable.length;
+
+                            await userDataDB.set(id, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
+                            return res.status(200).json({ msg: `Creating channel is success!`, status: true });
+                        }
+
+                    } else {
+                        return res.status(200).json({ msg: `Channel creation is successful!`, status: false });
+                    }
+                } else {
+                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+                }
+            }
+        });
+    } else {
+        return res.json({
+            result: false,
+            data: "No photo file"
+        });
+    }
+};
