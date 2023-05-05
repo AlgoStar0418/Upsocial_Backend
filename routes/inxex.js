@@ -24,7 +24,6 @@ var photoStorage = multer.diskStorage({
         cb(null, file.fieldname + '-' + Date.now() + '.jpg');
     }
 });
-
 var uploadPhoto = multer({ storage: photoStorage });
 
 // Thumbnail upload
@@ -36,9 +35,7 @@ var thumbnailStorage = multer.diskStorage({
         cb(null, file.fieldname + '-' + Date.now() + '.jpg');
     }
 });
-
 var uploadThumbnail = multer({ storage: thumbnailStorage });
-
 
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
@@ -93,5 +90,11 @@ router.post("/get/channel", Controller.getChannelByUser);
 
 // Follow channel api
 router.post("/follow/channel", Controller.followChannel);
+
+// unFollow channel api
+router.post("/unFollow/channel", Controller.unFollowChannel);
+
+// upload contents to channel
+router.post("/uploadContents/channel", uploadThumbnail.single('thumbnail'), Controller.uploadContentsChannel);
 
 module.exports = router;

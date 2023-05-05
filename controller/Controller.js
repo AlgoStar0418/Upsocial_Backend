@@ -241,11 +241,11 @@ exports.uploadContent = async (req, res) => {
             const curContents = contentDB.all;
             contentID = Object.keys(curContents).length;
 
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
             return res.status(200).json({ msg: `uploaded success`, status: true });
 
         } else {
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keyword, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
             return res.status(200).json({ msg: `uploaded success`, status: true });
         }
     } else {
@@ -761,7 +761,6 @@ exports.uploadPhoto = async (req, res) => {
 exports.createChannel = async (req, res) => {
     const { file } = req;
     const { channelName, handleUrl, aboutChannel, location, tags, url, userEmail } = req.body;
-
     if (file) {
         const addPhotoProcess = exec(`ipfs add ./photos/${file.filename}`);
 
@@ -883,6 +882,7 @@ exports.followChannel = async (req, res) => {
             let curFollowers;
             let curContents;
             let id;
+            let targetFollwers;
 
             for (var i = 0; i < channelData.length; i++) {
                 if (channelData[i]["email"] == userEmail) {
@@ -891,6 +891,11 @@ exports.followChannel = async (req, res) => {
                     curFollowers = channelData[i]["followers"];
                     curContents = channelData[i]["contents"];
                 }
+            }
+            targetFollwers = Object.values(curFollowers);
+
+            if (!targetFollwers.includes(curUser)) {
+                targetFollwers.push(curUser)
             }
 
             if (channelExist) {
@@ -903,7 +908,7 @@ exports.followChannel = async (req, res) => {
                     location: location,
                     url: url,
                     photo: photo,
-                    followers: curFollowers.push(curUser),
+                    followers: targetFollwers,
                     contents: curContents
                 });
                 result = await channelDB.get(id);
@@ -918,4 +923,168 @@ exports.followChannel = async (req, res) => {
     } else {
         return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
     }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.unFollowChannel = async (req, res) => {
+    const { curUser, channelName, aboutChannel, handleUrl, location, tags, url, photo, userEmail } = req.body;
+
+    if (channelDB != undefined) {
+        const channelId = 0;
+
+        if (channelDB.get(channelId) != undefined) {
+            const allChannels = channelDB.all;
+            const channelData = Object.values(allChannels);
+            let channelExist = false;
+            let result;
+            let curFollowers;
+            let curContents;
+            let id;
+            let targetFollwers;
+
+            for (var i = 0; i < channelData.length; i++) {
+                if (channelData[i]["email"] == userEmail) {
+                    id = i;
+                    channelExist = true;
+                    curFollowers = channelData[i]["followers"];
+                    curContents = channelData[i]["contents"];
+                }
+            }
+            targetFollwers = Object.values(curFollowers);
+
+            if (targetFollwers.includes(curUser)) {
+                const id = targetFollwers.indexOf(curUser);
+                targetFollwers.splice(id, 1);
+            }
+
+            if (channelExist) {
+                await channelDB.set(id, {
+                    channelName: channelName,
+                    email: userEmail,
+                    handleUrl: handleUrl,
+                    aboutChannel: aboutChannel,
+                    tags: tags,
+                    location: location,
+                    url: url,
+                    photo: photo,
+                    followers: targetFollwers,
+                    contents: curContents
+                });
+                result = await channelDB.get(id);
+                return res.status(200).json({ status: true, msg: "success!", channelData: result })
+            } else {
+                return res.status(200).json({ status: false, msg: "No Data!", channelData: result })
+            }
+
+        } else {
+            return res.status(200).json({ status: false, msg: "No Data", channelData: null });
+        }
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.uploadContentsChannel = async (req, res) => {
+    const { file } = req;
+    const { title, description, keywords, category, userEmail, video_src, channelAdmin, status } = req.body;
+
+    if (file) {
+        const uploadContentsChannel = exec(`ipfs add ./thumbnail/${file.filename}`);
+
+        uploadContentsChannel.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                const stats = await fs.statSync(`./thumbnail/${file.filename}`);
+                const size = filesize(stats.size).human('si');
+                const data = {
+                    filename: file.filename,
+                    sourceType: 'file',
+                    createdAt: (Date.now()).toString(),
+                    ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                    hashCode: hashCode,
+                    size: size,
+                }
+
+                if (channelDB != undefined) {
+                    const channelId = 0;
+
+                    if (channelDB.get(channelId) != undefined) {
+                        const allChannels = channelDB.all;
+                        const channelData = Object.values(allChannels);
+                        let channelExist = false;
+                        let result;
+                        let curFollowers;
+                        let curContents;
+                        let id;
+                        let targetContents;
+
+                        for (var i = 0; i < channelData.length; i++) {
+                            if (channelData[i]["email"] == channelAdmin) {
+                                id = i;
+                                channelExist = true;
+                                curFollowers = channelData[i]["followers"];
+                                curContents = channelData[i]["contents"];
+                            }
+                        }
+                        targetContents = Object.values(curContents);
+                        let newdata = {
+                            ID: targetContents.length,
+                            email: userEmail,
+                            title: title,
+                            description: description,
+                            keyword: keywords,
+                            category: category,
+                            ipfsUrl: video_src,
+                            thumbnail: data.ipfsUrl,
+                            status: status,
+                            liked: 0,
+                            disliked: 0,
+                            watched: 0,
+                            shared: 0,
+                            postDate: new Date(),
+                            comments: {},
+                            followers: []
+                        };
+
+                        targetContents.push(newdata);
+
+                        if (channelExist) {
+                            await channelDB.set(id, {
+                                channelName: channelName,
+                                email: userEmail,
+                                handleUrl: handleUrl,
+                                aboutChannel: aboutChannel,
+                                tags: tags,
+                                location: location,
+                                url: url,
+                                photo: photo,
+                                followers: curFollowers,
+                                contents: targetContents
+                            });
+                            result = await channelDB.get(id);
+                            return res.status(200).json({ status: true, msg: "success!", channelData: result })
+                        } else {
+                            return res.status(200).json({ status: false, msg: "No Data!", channelData: result })
+                        }
+
+                    } else {
+                        return res.status(200).json({ status: false, msg: "No Data", channelData: null });
+                    }
+                } else {
+                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+                }
+            }
+        });
+    } else {
+        return res.json({
+            result: false,
+            data: "No Thumbnail file"
+        });
+    }
+
 };
