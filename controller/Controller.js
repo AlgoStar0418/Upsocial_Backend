@@ -834,3 +834,31 @@ exports.getAllChannels = (req, res) => {
         return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
     }
 };
+
+exports.getChannelByUser = (req, res) => {
+    const { userEmail } = req.body;
+
+    if (channelDB != undefined) {
+        const channelId = 0;
+
+        if (channelDB.get(channelId) != undefined) {
+            const allChannels = channelDB.all;
+            const channelData = Object.values(allChannels);
+            let result = [];
+
+            for (var i = 0; i < channelData.length; i++) {
+                if (channelData[i]["email"] == userEmail) {
+                    result.push(channelData[i]);
+                }
+            }
+
+            return res.status(200).json({ status: true, msg: "success!", channelData: result })
+
+        } else {
+            return res.status(200).json({ status: false, msg: "No Data", channelData: null });
+        }
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+    }
+
+};
