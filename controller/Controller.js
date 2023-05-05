@@ -906,18 +906,7 @@ exports.followChannel = async (req, res) => {
                     followers: curFollowers.push(curUser),
                     contents: curContents
                 });
-                result = {
-                    channelName: channelName,
-                    email: userEmail,
-                    handleUrl: handleUrl,
-                    aboutChannel: aboutChannel,
-                    tags: tags,
-                    location: location,
-                    url: url,
-                    photo: photo,
-                    followers: curFollowers.push(curUser),
-                    contents: curContents
-                };
+                result = await channelDB.get(id);
                 return res.status(200).json({ status: true, msg: "success!", channelData: result })
             } else {
                 return res.status(200).json({ status: false, msg: "No Data!", channelData: result })
