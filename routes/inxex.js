@@ -91,4 +91,7 @@ router.post("/getAll/channels", Controller.getAllChannels);
 // get user channel
 router.post("/get/channel", Controller.getChannelByUser);
 
+// Follow channel api
+router.post("/follow/channel", Controller.followChannel);
+
 module.exports = router;

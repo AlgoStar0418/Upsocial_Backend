@@ -241,11 +241,11 @@ exports.uploadContent = async (req, res) => {
             const curContents = contentDB.all;
             contentID = Object.keys(curContents).length;
 
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
             return res.status(200).json({ msg: `uploaded success`, status: true });
 
         } else {
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
             return res.status(200).json({ msg: `uploaded success`, status: true });
         }
     } else {
@@ -286,11 +286,11 @@ exports.Web_uploadContent = (req, res) => {
                         const curContents = contentDB.all;
                         contentID = Object.keys(curContents).length;
 
-                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
 
                     } else {
-                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: {} });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
                     }
                 } else {
@@ -800,12 +800,12 @@ exports.createChannel = async (req, res) => {
                         } else {
                             let id = channelTable.length;
 
-                            await channelDB.set(id, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
+                            await channelDB.set(id, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl, followers: [], contents: {} });
                             return res.status(200).json({ msg: `Creating channel is success!`, status: true });
                         }
 
                     } else {
-                        await channelDB.set(0, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl });
+                        await channelDB.set(0, { channelName: channelName, email: userEmail, handleUrl: handleUrl, aboutChannel: aboutChannel, tags: tags, location: location, url: url, photo: data.ipfsUrl, followers: [], contents: {} });
                         return res.status(200).json({ msg: `Channel creation is successful!`, status: true });
                     }
                 } else {
@@ -835,6 +835,9 @@ exports.getAllChannels = (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.getChannelByUser = (req, res) => {
     const { userEmail } = req.body;
 
@@ -861,4 +864,69 @@ exports.getChannelByUser = (req, res) => {
         return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
     }
 
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.followChannel = async (req, res) => {
+    const { curUser, channelName, aboutChannel, handleUrl, location, tags, url, photo, userEmail } = req.body;
+
+    if (channelDB != undefined) {
+        const channelId = 0;
+
+        if (channelDB.get(channelId) != undefined) {
+            const allChannels = channelDB.all;
+            const channelData = Object.values(allChannels);
+            let channelExist = false;
+            let result = {};
+            let curFollowers = [];
+            let curContents = [];
+            let id;
+
+            for (var i = 0; i < channelData.length; i++) {
+                if (channelData[i]["email"] == userEmail) {
+                    id = i;
+                    channelExist = true;
+                    curFollowers = channelData[i]["followers"];
+                    curContents = channelData[i]["contents"];
+                }
+            }
+
+            if (channelExist) {
+                await channelDB.set(id, {
+                    channelName: channelName,
+                    email: userEmail,
+                    handleUrl: handleUrl,
+                    aboutChannel: aboutChannel,
+                    tags: tags,
+                    location: location,
+                    url: url,
+                    photo: photo,
+                    followers: curFollowers.push(curUser),
+                    contents: curContents
+                });
+                result = {
+                    channelName: channelName,
+                    email: userEmail,
+                    handleUrl: handleUrl,
+                    aboutChannel: aboutChannel,
+                    tags: tags,
+                    location: location,
+                    url: url,
+                    photo: photo,
+                    followers: curFollowers.push(curUser),
+                    contents: curContents
+                };
+                return res.status(200).json({ status: true, msg: "success!", channelData: result })
+            } else {
+                return res.status(200).json({ status: false, msg: "No Data!", channelData: result })
+            }
+
+        } else {
+            return res.status(200).json({ status: false, msg: "No Data", channelData: null });
+        }
+    } else {
+        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+    }
 };
