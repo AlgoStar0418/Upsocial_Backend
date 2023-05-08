@@ -209,7 +209,7 @@ exports.userLogin = async (req, res) => {
             if (!userAuth) {
                 return res.status(200).json({ msg: `Auth failed!`, status: false });
             } else {
-                const responseData = userTable.get(userId);
+                const responseData = curUsers.get(userId);
                 return res.status(200).json({ msg: `Auth success!`, status: true, curUser: email, Data: responseData });
             }
 
