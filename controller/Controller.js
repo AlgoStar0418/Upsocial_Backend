@@ -789,13 +789,13 @@ exports.createChannel = async (req, res) => {
                         let channelExist = false;
 
                         for (var i = 0; i < channelTable.length; i++) {
-                            if (channelTable[i]["email"] == userEmail) {
+                            if (channelTable[i]["email"] == userEmail && channelTable[i]["channelName"] == channelName) {
                                 channelExist = true;
                             }
                         }
 
                         if (channelExist) {
-                            return res.status(200).json({ msg: `You already created channel!`, status: false });
+                            return res.status(200).json({ msg: `Channel name is not unique. Choose another name!`, status: false });
                         } else {
                             let id = channelTable.length;
 
@@ -808,7 +808,7 @@ exports.createChannel = async (req, res) => {
                         return res.status(200).json({ msg: `Channel creation is successful!`, status: true });
                     }
                 } else {
-                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", status: false });
                 }
             }
         });
