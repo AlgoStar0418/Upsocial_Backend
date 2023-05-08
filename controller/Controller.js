@@ -199,6 +199,7 @@ exports.userLogin = async (req, res) => {
                     const decrypted_password = await decryptString(userTable[i]["password"], ENCRYPT_PASS);
                     if (decrypted_password == password) {
                         userAuth = true;
+                        userId = i;
                     } else {
                         userAuth = false;
                     }
@@ -208,7 +209,8 @@ exports.userLogin = async (req, res) => {
             if (!userAuth) {
                 return res.status(200).json({ msg: `Auth failed!`, status: false });
             } else {
-                return res.status(200).json({ msg: `Auth success!`, status: true, curUser: email });
+                const responseData = userTable.get(userId);
+                return res.status(200).json({ msg: `Auth success!`, status: true, curUser: email, Data: responseData });
             }
 
         } else {
