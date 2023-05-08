@@ -993,7 +993,7 @@ exports.unFollowChannel = async (req, res) => {
 
 exports.uploadContentsChannel = async (req, res) => {
     const { file } = req;
-    const { title, description, keywords, category, userEmail, video_src, channelAdmin, status } = req.body;
+    const { title, description, keywords, category, userEmail, video_src, channelAdmin, channelName, status } = req.body;
 
     if (file) {
         const uploadContentsChannel = exec(`ipfs add ./thumbnail/${file.filename}`);
@@ -1025,7 +1025,6 @@ exports.uploadContentsChannel = async (req, res) => {
                         let id;
                         let targetContents;
 
-                        let channelName;
                         let handleUrl;
                         let aboutChannel;
                         let tags;
@@ -1034,11 +1033,10 @@ exports.uploadContentsChannel = async (req, res) => {
                         let photo;
 
                         for (var i = 0; i < channelData.length; i++) {
-                            if (channelData[i]["email"] == channelAdmin) {
+                            if (channelData[i]["email"] == channelAdmin && channelData[i]["channelName"] == channelName) {
                                 id = i;
                                 channelExist = true;
 
-                                channelName = channelData[i]["channelName"];
                                 handleUrl = channelData[i]["handleUrl"];
                                 aboutChannel = channelData[i]["aboutChannel"];
                                 tags = channelData[i]["tags"];
