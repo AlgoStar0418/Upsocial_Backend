@@ -67,6 +67,14 @@ router.post("/users/set/content/ChangeStatus", Controller.changeContentStatus);
 // Upload Content
 router.post("/users/content/uploadContent", Controller.uploadContent);
 
+// Like Content
+router.post("/users/content/like", Controller.likeContent);
+router.post("/content/like", Controller.likeVideos);
+
+// Dislike Content
+router.post("/users/content/dislike", Controller.dislikeContent);
+router.post("/content/dislike", Controller.dislikeVideos);
+
 // Upload Content in Web
 router.post("/users/content/web/uploadContent", uploadThumbnail.single('thumbnail'), Controller.Web_uploadContent);
 
