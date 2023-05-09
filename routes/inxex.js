@@ -55,6 +55,12 @@ router.post("/users/login", Controller.userLogin);
 // Set user status (Active and ban)
 router.post("/users/set/userStatus", Controller.changeUserStatus);
 
+// set follow user
+router.post("/users/follow", Controller.followUser);
+
+// set unfollow user
+router.post("/users/unfollow", Controller.unfollowUser);
+
 // Set user's content status (Active and ban)
 router.post("/users/set/content/ChangeStatus", Controller.changeContentStatus);
 

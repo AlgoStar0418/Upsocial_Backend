@@ -84,7 +84,7 @@ exports.getAllUsers = (req, res) => {
 
         return res.status(200).json({ userData: userData });
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", userData: null });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
     }
 };
 
@@ -121,7 +121,7 @@ exports.getUsersByEmail = async (req, res) => {
             return res.status(200).json({ msg: `You are not registered!`, status: false });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 };
 
@@ -158,7 +158,7 @@ exports.userRegister = async (req, res) => {
             }
 
             if (!userExist) {
-                await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true });
+                await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true, following: [], followers: [] });
                 return res.status(200).json({ msg: `${email} is registered success !`, status: true });
             } else {
                 return res.status(200).json({ msg: `${email} is already registered !`, status: false });
@@ -166,11 +166,11 @@ exports.userRegister = async (req, res) => {
 
 
         } else {
-            await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true });
+            await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true, following: [], followers: [] });
             return res.status(200).json({ msg: `${email} is registered success !`, status: true });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 
 };
@@ -217,7 +217,7 @@ exports.userLogin = async (req, res) => {
             return res.status(200).json({ msg: `Your credentials not found!`, status: false });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 
 };
@@ -251,7 +251,7 @@ exports.uploadContent = async (req, res) => {
             return res.status(200).json({ msg: `uploaded success`, status: true });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 };
 
@@ -296,7 +296,7 @@ exports.Web_uploadContent = (req, res) => {
                         return res.status(200).json({ msg: `uploaded success`, status: true });
                     }
                 } else {
-                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+                    return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
                 }
             }
         });
@@ -335,7 +335,7 @@ exports.GetUploadedContent = async (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", data: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 };
 
@@ -373,7 +373,7 @@ exports.GetUploadedContentByCategory = (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", data: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 
 };
@@ -401,7 +401,7 @@ exports.GetAllUploadedContent = (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", data: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 };
 
@@ -423,12 +423,16 @@ exports.changeUserStatus = async (req, res) => {
             let userExist = false;
             let username;
             let password;
+            let following;
+            let followers;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
                     userId = i;
                     username = userTable[i]["username"];
                     password = userTable[i]["password"];
+                    following = userTable[i]["following"];
+                    followers = userTable[i]["followers"];
                     userExist = true;
                 }
             }
@@ -436,7 +440,7 @@ exports.changeUserStatus = async (req, res) => {
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
-                await userDataDB.set(userId, { username: username, email: userEmail, password: password, status: status });
+                await userDataDB.set(userId, { username: username, email: userEmail, password: password, status: status, following: following, followers: followers });
                 return res.status(200).json({ msg: `Success!`, status: true });
             }
 
@@ -444,7 +448,149 @@ exports.changeUserStatus = async (req, res) => {
             return res.status(200).json({ msg: `You are not registered!`, status: false });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.followUser = async (req, res) => {
+    const { curUser, tarUser } = req.body;
+
+    let userId = 0;
+    if (userDataDB != undefined) {
+
+        if (userDataDB.get(userId) != undefined) {
+
+            const curUsers = userDataDB.all;
+
+            let userTable = Object.values(curUsers);
+            let flag = false;
+
+            let curUserId;
+            let curUsername;
+            let curPassword;
+            let curStatus;
+            let curFollowers;
+            let curFollowing;
+
+            let tarUserId;
+            let tarUsername;
+            let tarPassword;
+            let tarStatus;
+            let tarFollowers;
+            let tarFollowing;
+
+            for (var i = 0; i < userTable.length; i++) {
+                if (userTable[i]["email"] == curUser) {
+                    curUserId = i;
+                    curUsername = userTable[i]["username"];
+                    curPassword = userTable[i]["password"];
+                    curStatus = userTable[i]["status"];
+                    curFollowers = userTable[i]["followers"];
+                    curFollowing = userTable[i]["following"];
+                }
+                if (userTable[i]["email"] == tarUser) {
+                    tarUserId = i;
+                    tarUsername = userTable[i]["username"];
+                    tarPassword = userTable[i]["password"];
+                    tarStatus = userTable[i]["status"];
+                    tarFollowers = userTable[i]["followers"];
+                    tarFollowing = userTable[i]["following"];
+                }
+            }
+
+            if (curFollowing.includes(tarUser) && tarFollowers.includes(curUser)) {
+                flag = true;
+            }
+
+            if (flag) {
+                return res.status(200).json({ msg: `Already followed!`, status: false });
+            } else {
+                curFollowing.push(tarUser);
+                tarFollowers.push(curUser);
+                await userDataDB.set(curUserId, { username: curUsername, email: curUser, password: curPassword, status: curStatus, following: curFollowing, followers: curFollowers });
+                await userDataDB.set(tarUserId, { username: tarUsername, email: tarUser, password: tarPassword, status: tarStatus, following: tarFollowing, followers: tarFollowers });
+                return res.status(200).json({ msg: `Follow Successful!`, status: true });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `You are not registered!`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.unfollowUser = async (req, res) => {
+    const { curUser, tarUser } = req.body;
+
+    let userId = 0;
+    if (userDataDB != undefined) {
+
+        if (userDataDB.get(userId) != undefined) {
+
+            const curUsers = userDataDB.all;
+
+            let userTable = Object.values(curUsers);
+            let flag = false;
+
+            let curUserId;
+            let curUsername;
+            let curPassword;
+            let curStatus;
+            let curFollowers;
+            let curFollowing;
+
+            let tarUserId;
+            let tarUsername;
+            let tarPassword;
+            let tarStatus;
+            let tarFollowers;
+            let tarFollowing;
+
+            for (var i = 0; i < userTable.length; i++) {
+                if (userTable[i]["email"] == curUser) {
+                    curUserId = i;
+                    curUsername = userTable[i]["username"];
+                    curPassword = userTable[i]["password"];
+                    curStatus = userTable[i]["status"];
+                    curFollowers = userTable[i]["followers"];
+                    curFollowing = userTable[i]["following"];
+                }
+                if (userTable[i]["email"] == tarUser) {
+                    tarUserId = i;
+                    tarUsername = userTable[i]["username"];
+                    tarPassword = userTable[i]["password"];
+                    tarStatus = userTable[i]["status"];
+                    tarFollowers = userTable[i]["followers"];
+                    tarFollowing = userTable[i]["following"];
+                }
+            }
+
+            if (curFollowing.includes(tarUser) && tarFollowers.includes(curUser)) {
+                flag = true;
+            }
+
+            if (flag) {
+                curFollowing.splice(curFollowing.indexOf(tarUser), 1);
+                tarFollowers.splice(curFollowing.indexOf(curUser), 1);
+                await userDataDB.set(curUserId, { username: curUsername, email: curUser, password: curPassword, status: curStatus, following: curFollowing, followers: curFollowers });
+                await userDataDB.set(tarUserId, { username: tarUsername, email: tarUser, password: tarPassword, status: tarStatus, following: tarFollowing, followers: tarFollowers });
+                return res.status(200).json({ msg: `unFollow Successful!`, status: true });
+            } else {
+                return res.status(200).json({ msg: `You didn't followed yet!`, status: false });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `You are not registered!`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 };
 
@@ -469,7 +615,7 @@ exports.changeContentStatus = async (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", data: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
 
 };
@@ -724,12 +870,16 @@ exports.uploadPhoto = async (req, res) => {
                         let userExist = false;
                         let password;
                         let status;
+                        let followers;
+                        let following;
 
                         for (var i = 0; i < userTable.length; i++) {
                             if (userTable[i]["email"] == userEmail) {
                                 userId = i;
                                 status = userTable[i]["status"];
                                 password = userTable[i]["password"];
+                                followers = userTable[i]["followers"];
+                                following = userTable[i]["following"];
                                 userExist = true;
                             }
                         }
@@ -737,7 +887,7 @@ exports.uploadPhoto = async (req, res) => {
                         if (!userExist) {
                             return res.status(200).json({ msg: `User is not registered!`, status: false });
                         } else {
-                            await userDataDB.set(userId, { username: name, email: userEmail, password: password, status: status, handle: handle, description: description, location: location, photo: data.ipfsUrl });
+                            await userDataDB.set(userId, { username: name, email: userEmail, password: password, status: status, handle: handle, description: description, location: location, photo: data.ipfsUrl, followers: followers, following: following });
                             return res.status(200).json({ msg: `Success!`, status: true, data: data });
                         }
 
@@ -745,7 +895,7 @@ exports.uploadPhoto = async (req, res) => {
                         return res.status(200).json({ msg: `Saving your profile is change!`, status: false });
                     }
                 } else {
-                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !" });
+                    return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
                 }
             }
         });
@@ -810,7 +960,7 @@ exports.createChannel = async (req, res) => {
                         return res.status(200).json({ msg: `Channel creation is successful!`, status: true });
                     }
                 } else {
-                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", status: false });
+                    return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", status: false });
                 }
             }
         });
@@ -832,7 +982,7 @@ exports.getAllChannels = (req, res) => {
 
         return res.status(200).json({ channelData: channelData });
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", channelData: null });
     }
 };
 
@@ -862,7 +1012,7 @@ exports.getChannelByUser = (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", channelData: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", channelData: null });
     }
 
 };
@@ -923,7 +1073,7 @@ exports.followChannel = async (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", channelData: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", channelData: null });
     }
 };
 
@@ -984,7 +1134,7 @@ exports.unFollowChannel = async (req, res) => {
             return res.status(200).json({ status: false, msg: "No Data", channelData: null });
         }
     } else {
-        return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", channelData: null });
     }
 };
 
@@ -1092,7 +1242,7 @@ exports.uploadContentsChannel = async (req, res) => {
                         return res.status(200).json({ status: false, msg: "No Data", channelData: null });
                     }
                 } else {
-                    return res.status(200).json({ msg: "You have to Create DB ! Ask to Admin !", channelData: null });
+                    return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", channelData: null });
                 }
             }
         });
