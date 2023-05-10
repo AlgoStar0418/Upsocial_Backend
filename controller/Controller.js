@@ -445,6 +445,7 @@ exports.personalized = async (req, res) => {
         var model = recommender.fit(table);
         predicted_table = recommender.transform(table);
         var resultids = [];
+        var feeds = [];
 
         // get recommended video ids
         for (var i = 0; i < predicted_table.columnNames.length; ++i) {
@@ -459,7 +460,15 @@ exports.personalized = async (req, res) => {
                 }
             }
         }
-        return res.json({ movieIds: resultids });
+
+        if (resultids.length > 0) {
+            for (var i = 0; i < resultids.length; i++) {
+                feeds.push(contentsTable[Number(resultids)]);
+            }
+            return res.status(200).json({ status: true, msg: "success", feeds: feeds });
+        } else {
+            return res.status(200).json({ status: false, msg: "No Feeds, Your interaction data is not enough", feeds: null });
+        }
 
     } else {
         return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
