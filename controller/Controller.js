@@ -465,7 +465,7 @@ exports.personalized = async (req, res) => {
             for (var i = 0; i < resultids.length; i++) {
                 feeds.push(contentsTable[Number(resultids)]);
             }
-            return res.status(200).json({ status: true, msg: "success", feeds: feeds });
+            return res.status(200).json({ status: true, msg: "success", feeds: feeds, videoIds: resultids });
         } else {
             return res.status(200).json({ status: false, msg: "No Feeds, Your interaction data is not enough", feeds: null });
         }
