@@ -55,13 +55,12 @@ let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 
 exports.CreateDBs = async (req, res) => {
     if (userDataDB == undefined && contentDB == undefined) {
-        // ipfs = await IPFS.create({
-        //     EXPERIMENTAL: {
-        //         pubsub: true,
-        //     },
-        //     repo: "UpsocialRepo"
-        // });
-        ipfs = await IPFS.create();
+        ipfs = await IPFS.create({
+            EXPERIMENTAL: {
+                pubsub: true,
+            },
+            repo: "UpsocialRepo"
+        });
 
         orbitdb = await OrbitDB.createInstance(ipfs, {});
 
