@@ -403,7 +403,7 @@ exports.dislikeVideos = async (req, res) => {
 
             let disliked = data.disliked + 1;
 
-            await contentDB.put(videoId, { ID: videoId, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: liked, disliked: disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
+            await contentDB.put(videoId, { ID: videoId, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: data.liked, disliked: disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
 
             return res.status(200).json({ status: true, msg: "success!", data: data })
 
