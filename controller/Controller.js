@@ -444,6 +444,7 @@ exports.personalized = async (req, res) => {
         // Get predict table
         var model = recommender.fit(table);
         predicted_table = recommender.transform(table);
+        var resultids = [];
 
         // get recommended video ids
         for (var i = 0; i < predicted_table.columnNames.length; ++i) {
@@ -453,10 +454,12 @@ exports.personalized = async (req, res) => {
                     var movie = predicted_table.rowNames[j];
                     if (!Math.round(table.getCell(movie, user)) && Math.round(predicted_table.getCell(movie, user)) > 0) {
                         console.log(movie);
+                        resultids.push(movie);
                     }
                 }
             }
         }
+        return res.json({ movieIds: resultids });
 
     } else {
         return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
