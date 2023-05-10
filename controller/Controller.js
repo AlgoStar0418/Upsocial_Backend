@@ -273,6 +273,7 @@ exports.likeContent = async (req, res) => {
             let followers;
             let liked;
             let disliked;
+            let status;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
@@ -283,6 +284,7 @@ exports.likeContent = async (req, res) => {
                     followers = userTable[i]["followers"];
                     liked = userTable[i]["Liked"];
                     disliked = userTable[i]["Disliked"];
+                    status = userTable[i]["status"];
                     userExist = true;
                     console.log(userId)
                     console.log(username)
@@ -354,6 +356,7 @@ exports.dislikeContent = async (req, res) => {
             let followers;
             let liked;
             let disliked;
+            let status;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
@@ -364,6 +367,7 @@ exports.dislikeContent = async (req, res) => {
                     followers = userTable[i]["followers"];
                     liked = userTable[i]["Liked"];
                     disliked = userTable[i]["Disliked"];
+                    status = userTable[i]["status"];
                     userExist = true;
                 }
             }
