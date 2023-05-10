@@ -463,7 +463,7 @@ exports.personalized = async (req, res) => {
 
         if (resultids.length > 0) {
             for (var i = 0; i < resultids.length; i++) {
-                feeds.push(contentsTable[Number(resultids)]);
+                feeds.push(contentsTable[Number([resultids[i]])]);
             }
             return res.status(200).json({ status: true, msg: "success", feeds: feeds, videoIds: resultids });
         } else {
