@@ -7,6 +7,11 @@ const fs = require('fs');
 const filesize = require("file-size");
 const { encryptString, decryptString } = require('encrypt-string');
 
+// recommendation system configure value
+let jsrecommender = require("js-recommender");
+let recommender = new jsrecommender.Recommender();
+let table = new jsrecommender.Table();
+
 const items = [
     { id: 1, name: 'Animation' },
     { id: 2, name: 'Autos & Vehicles' },
@@ -260,7 +265,6 @@ exports.uploadContent = async (req, res) => {
 
 exports.likeContent = async (req, res) => {
     const { videoId, userEmail } = req.body;
-    console.log(videoId, userEmail);
     let userId = 0;
     if (userDataDB != undefined) {
         if (userDataDB.get(userId) != undefined) {
@@ -286,21 +290,13 @@ exports.likeContent = async (req, res) => {
                     disliked = userTable[i]["Disliked"];
                     status = userTable[i]["status"];
                     userExist = true;
-                    console.log(userId)
-                    console.log(username)
-                    console.log(password)
-                    console.log(following)
-                    console.log(followers)
-                    console.log(liked)
-                    console.log(disliked)
                 }
             }
 
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
-                console.log(liked.includes(videoId))
-                if (liked.includes(videoId)) {
+                if (liked.includes(videoId) || disliked.includes(videoId)) {
                     return res.status(200).json({ msg: `You already liked this video !`, status: true });
                 } else {
                     liked.push(videoId);
@@ -375,7 +371,7 @@ exports.dislikeContent = async (req, res) => {
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
-                if (disliked.includes(videoId)) {
+                if (disliked.includes(videoId) || liked.includes(videoId)) {
                     return res.status(200).json({ msg: `You already liked this video !`, status: true });
                 } else {
                     disliked.push(videoId);
@@ -412,6 +408,58 @@ exports.dislikeVideos = async (req, res) => {
         }
     } else {
         return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.personalized = async (req, res) => {
+    const { userEmail } = req.body;
+
+    if (userDataDB != undefined || contentDB != undefined) {
+        // user data
+        const curUsers = userDataDB.all;
+        const userData = Object.values(curUsers);
+        console.log(userData.length);
+
+        // content data
+        const allContents = contentDB.all;
+        let contentsTable = Object.values(allContents);
+        console.log(contentsTable.length);
+
+        // selected user index
+        index = userData.findIndex(x => x.email === userEmail);
+
+        // set table
+        userData.map((item, key) => {
+            for (var i = 0; i < item.Liked.length; i++) {
+                table.setCell(item.Liked[i].toString(), item.email, 1);
+            }
+            for (var i = 0; i < item.Disliked.length; i++) {
+                table.setCell(item.Disliked[i].toString(), item.email, 0);
+            }
+        });
+
+        // Get predict table
+        var model = recommender.fit(table);
+        predicted_table = recommender.transform(table);
+
+        // get recommended video ids
+        for (var i = 0; i < predicted_table.columnNames.length; ++i) {
+            var user = predicted_table.columnNames[i];
+            if (user == userEmail) {
+                for (var j = 0; j < predicted_table.rowNames.length; ++j) {
+                    var movie = predicted_table.rowNames[j];
+                    if (!Math.round(table.getCell(movie, user)) && Math.round(predicted_table.getCell(movie, user)) > 0) {
+                        console.log(movie);
+                    }
+                }
+            }
+        }
+
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
     }
 };
 

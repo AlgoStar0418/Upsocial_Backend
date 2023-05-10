@@ -75,6 +75,9 @@ router.post("/content/like", Controller.likeVideos);
 router.post("/users/content/dislike", Controller.dislikeContent);
 router.post("/content/dislike", Controller.dislikeVideos);
 
+// Personalized feeds & algorithm
+router.post("/users/personalize", Controller.personalized);
+
 // Upload Content in Web
 router.post("/users/content/web/uploadContent", uploadThumbnail.single('thumbnail'), Controller.Web_uploadContent);
 
