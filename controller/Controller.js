@@ -260,6 +260,7 @@ exports.uploadContent = async (req, res) => {
 
 exports.likeContent = async (req, res) => {
     const { videoId, userEmail } = req.body;
+    console.log(videoId, userEmail);
     let userId = 0;
     if (userDataDB != undefined) {
         if (userDataDB.get(userId) != undefined) {
@@ -283,12 +284,20 @@ exports.likeContent = async (req, res) => {
                     liked = userTable[i]["Liked"];
                     disliked = userTable[i]["Disliked"];
                     userExist = true;
+                    console.log(userId)
+                    console.log(username)
+                    console.log(password)
+                    console.log(following)
+                    console.log(followers)
+                    console.log(liked)
+                    console.log(disliked)
                 }
             }
 
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
+                console.log(liked.includes(videoId))
                 if (liked.includes(videoId)) {
                     return res.status(200).json({ msg: `You already liked this video !`, status: true });
                 } else {
