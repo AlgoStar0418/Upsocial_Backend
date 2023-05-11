@@ -5,12 +5,24 @@ const IPFS = require("ipfs");
 const { exec } = require('node:child_process');
 const fs = require('fs');
 const filesize = require("file-size");
+const nodemailer = require('nodemailer');
+const smtpTransport = require('nodemailer-smtp-transport');
 const { encryptString, decryptString } = require('encrypt-string');
 
 // recommendation system configure value
 let jsrecommender = require("js-recommender");
 let recommender = new jsrecommender.Recommender();
 let table = new jsrecommender.Table();
+
+const generateRandomString = length => {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+};
 
 const items = [
     { id: 1, name: 'Animation' },
@@ -180,6 +192,177 @@ exports.userRegister = async (req, res) => {
 
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.resetPassword = async (req, res) => {
+
+    const { userEmail } = req.body;
+    let userId = 0;
+    if (userDataDB != undefined) {
+
+        if (userDataDB.get(userId) != undefined) {
+
+            const curUsers = userDataDB.all;
+
+            let userTable = Object.values(curUsers);
+
+            let userAuth = false;
+            let username;
+            let password;
+            let following;
+            let followers;
+            let status;
+            let liked;
+            let disliked;
+
+
+            for (var i = 0; i < userTable.length; i++) {
+                if (userTable[i]["email"] == userEmail && userTable[i]["status"]) {
+                    userId = i;
+                    userAuth = true;
+                    username = userTable[i]["username"];
+                    password = userTable[i]["password"];
+                    following = userTable[i]["following"];
+                    followers = userTable[i]["followers"];
+                    liked = userTable[i]["Liked"];
+                    disliked = userTable[i]["Disliked"];
+                    status = userTable[i]["status"];
+                }
+            }
+
+            if (!userAuth) {
+                return res.status(200).json({ msg: `Your Email is not registered!`, status: false });
+            } else {
+
+                const code = await generateRandomString(6);
+                await userDataDB.set(userId, { username: username, email: userEmail, password: password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked, code: code });
+
+                var transport = nodemailer.createTransport(
+                    smtpTransport({
+                        service: "Gmail",
+                        auth: {
+                            user: "stanislav.kogutstt2@gmail.com",
+                            pass: "phlbvyefyuiddptp",
+                        },
+                    })
+                );
+                // setup e-mail data with unicode symbols
+                var mailOptions = {
+                    from: 'stanislav.kogutstt2@gmail.com', // sender address
+                    to: userEmail, // list of receivers
+                    subject: "Reset Password!", // Subject line
+                    text: 'This your recovery code: ' + code, // plaintext body
+                };
+                // send mail with defined transport object
+                transport.sendMail(mailOptions, function (error, response) {
+                    if (error) {
+                        return res.status(200).json({ msg: `We can't send code to his email!`, status: false });
+                    } else {
+                        return res.status(200).json({ msg: `Check your email and get code!`, status: true });
+                    }
+                });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `Your credentials not found!`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.verifyCode = async (req, res) => {
+    const { userEmail, code } = req.body;
+
+    let userId = 0;
+    if (userDataDB != undefined) {
+
+        if (userDataDB.get(userId) != undefined) {
+
+            const curUsers = userDataDB.all;
+
+            let userTable = Object.values(curUsers);
+
+            let userAuth = false;
+
+            for (var i = 0; i < userTable.length; i++) {
+                if (userTable[i]["email"] == userEmail && userTable[i]["code"] == code) {
+                    userAuth = true;
+                }
+            }
+
+            if (!userAuth) {
+                return res.status(200).json({ msg: `Your code is not correct! Try Again!`, status: false });
+            } else {
+                return res.status(200).json({ msg: `Success! Reset your password!`, status: true });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `Your credentials not found!`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.setNewPassword = async (req, res) => {
+    const { userEmail, password } = req.body;
+
+    const encrypted_password = await encryptString(password, ENCRYPT_PASS);
+
+    let userId = 0;
+    if (userDataDB != undefined) {
+
+        if (userDataDB.get(userId) != undefined) {
+
+            const curUsers = userDataDB.all;
+
+            let userTable = Object.values(curUsers);
+
+            let userExist = false;
+
+            let username;
+            let status;
+            let following;
+            let followers;
+            let liked;
+            let disliked;
+
+            for (var i = 0; i < userTable.length; i++) {
+                if (userTable[i]["email"] == userEmail) {
+                    userId = i;
+                    username = userTable[i]["username"];
+                    status = userTable[i]["status"];
+                    following = userTable[i]["following"];
+                    followers = userTable[i]["followers"];
+                    liked = userTable[i]["Liked"];
+                    disliked = userTable[i]["Disliked"];
+                    userExist = true;
+                }
+            }
+
+            if (!userExist) {
+                return res.status(200).json({ msg: `User is not registered!`, status: false });
+            } else {
+                await userDataDB.set(userId, { username: username, email: userEmail, password: encrypted_password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked });
+                return res.status(200).json({ msg: `Success!`, status: true });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `You are not registered!`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 

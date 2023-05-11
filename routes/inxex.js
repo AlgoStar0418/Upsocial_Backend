@@ -49,6 +49,15 @@ router.post("/admin/getUsers", Controller.getUsersByEmail);
 // User Register
 router.post("/users/register", Controller.userRegister);
 
+// user reset-password
+router.post("/users/reset-password", Controller.resetPassword);
+
+// Verify Code
+router.post("/users/verify-code", Controller.verifyCode);
+
+// Set New Password
+router.post("/users/set-new-password", Controller.setNewPassword);
+
 // User Login
 router.post("/users/login", Controller.userLogin);
 
