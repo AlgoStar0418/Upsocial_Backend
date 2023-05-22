@@ -11,7 +11,7 @@ app.use(cors());
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.json({ limit: '800mb' }));
 app.use(express.static("downloads"));
 
 // Use routes
