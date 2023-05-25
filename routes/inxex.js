@@ -37,6 +37,17 @@ var thumbnailStorage = multer.diskStorage({
 });
 var uploadThumbnail = multer({ storage: thumbnailStorage });
 
+// Playlists photo upload
+var playlistStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "playlists")
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.jpg');
+    }
+});
+var uploadPlaylist = multer({ storage: playlistStorage });
+
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
 
@@ -122,5 +133,25 @@ router.post("/unFollow/channel", Controller.unFollowChannel);
 
 // upload contents to channel
 router.post("/uploadContents/channel", uploadThumbnail.single('thumbnail'), Controller.uploadContentsChannel);
+
+// create playlist
+router.post("/create/playlist", uploadPlaylist.single("photo"), Controller.createPlaylist);
+
+// remove playlist
+router.post("/remove/playlist", Controller.removePlaylist);
+
+// Get playlist
+router.post("/getAll/playlist", Controller.getPlaylist);
+
+// Add video to Playlist
+router.post("/playlist/addVideo", Controller.addVideoToPlaylist);
+
+// Remove video from playlists
+router.post("/playlist/removeVideo", Controller.removeVideoToPlaylist);
+
+// Get All playlists Videos
+router.post("/playlist/getAllVideo", Controller.getAllVideoFromPlaylist);
+
+
 
 module.exports = router;

@@ -58,6 +58,7 @@ let orbitdb;
 let userDataDB; // User Profile Database
 let contentDB; // Content Management Database
 let channelDB; // Channel Management Database
+let playlistDB; // Playlist Management Database
 
 let hashHistories = [];
 
@@ -84,6 +85,9 @@ exports.CreateDBs = async (req, res) => {
 
         channelDB = await orbitdb.kvstore("channelDB", { overwrite: true });
         await channelDB.load();
+
+        playlistDB = await orbitdb.kvstore("playlistDB", { overwrite: true });
+        await playlistDB.load()
 
         return res.status(200).json({ dbCreated: true });
     } else {
@@ -1679,4 +1683,330 @@ exports.uploadContentsChannel = async (req, res) => {
         });
     }
 
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.createPlaylist = async (req, res) => {
+    const { file } = req;
+    const { userEmail, playlistTitle, playlistDescription } = req.body;
+    if (file) {
+        const addPhotoProcess = exec(`ipfs add ./playlists/${file.filename}`);
+
+        addPhotoProcess.stdout.on('data', async function (result) {
+            if (result && result.indexOf('added') >= 0) {
+                const hashCode = result.split(' ')[1];
+                const stats = await fs.statSync(`./playlists/${file.filename}`);
+                const size = filesize(stats.size).human('si');
+                const data = {
+                    filename: file.filename,
+                    sourceType: 'file',
+                    createdAt: (Date.now()).toString(),
+                    ipfsUrl: process.env.IPFS_BASE_URL + hashCode,
+                    hashCode: hashCode,
+                    size: size,
+                }
+                let PlaylistId = 0;
+                if (playlistDB != undefined) {
+
+                    if (playlistDB.get(PlaylistId) != undefined) {
+
+                        const curPlaylists = playlistDB.all;
+
+                        let playlistsTable = Object.values(curPlaylists);
+
+                        let playlistExist = false;
+
+                        for (var i = 0; i < playlistsTable.length; i++) {
+                            if (playlistsTable[i]["userEmail"] == userEmail && playlistsTable[i]["title"] == playlistTitle) {
+                                playlistExist = true;
+                            }
+                        }
+
+                        if (playlistExist) {
+                            return res.status(200).json({ msg: `PlayList name is not unique. Choose another name!`, status: false });
+                        } else {
+                            let id = playlistsTable.length;
+
+                            await playlistDB.set(id, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: new Date() });
+                            return res.status(200).json({ msg: `Creating playlist is success!`, status: true });
+                        }
+
+                    } else {
+                        await playlistDB.set(0, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: new Date() });
+                        return res.status(200).json({ msg: `Creating playlist is successful!`, status: true });
+                    }
+                } else {
+                    return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", status: false });
+                }
+            }
+        });
+    } else {
+        return res.json({
+            result: false,
+            data: "No photo file"
+        });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.removePlaylist = async (req, res) => {
+    // const hash = await db.del('hello');
+    const { userEmail, playlistTitle } = req.body;
+    let PlaylistId = 0;
+    if (playlistDB != undefined) {
+
+        if (playlistDB.get(PlaylistId) != undefined) {
+
+            const curPlaylists = playlistDB.all;
+
+            let playlistsTable = Object.values(curPlaylists);
+
+            let playlistExist = false;
+
+            let resultKey;
+
+            for (var i = 0; i < playlistsTable.length; i++) {
+                if (playlistsTable[i]["userEmail"] == userEmail && playlistsTable[i]["title"] == playlistTitle) {
+                    playlistExist = true;
+                    resultKey = i;
+                }
+            }
+
+            if (playlistExist) {
+                await playlistDB.del(resultKey);
+                return res.status(200).json({ msg: `Success Deleted!`, status: true });
+            } else {
+                return res.status(200).json({ msg: `The Playlist is not existing !`, status: false });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `The Playlist is not existing  !`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", status: false });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.getPlaylist = async (req, res) => {
+    if (playlistDB != undefined) {
+        const curPlaylists = playlistDB.all;
+        const PlaylistData = Object.values(curPlaylists);
+
+        return res.status(200).json({ PlaylistData: PlaylistData });
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", PlaylistData: null });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.addVideoToPlaylist = async (req, res) => {
+    const { userEmail,
+        playlistTitle,
+        creatorEmail,
+        ID,
+        title,
+        description,
+        keywords,
+        category,
+        video_src,
+        thumbnail,
+        status,
+        postDate,
+        liked,
+        shared,
+        disliked,
+        watched,
+        comments,
+        followers } = req.body;
+
+    if (playlistDB != undefined) {
+
+        let playlistID = 0;
+
+        if (playlistDB.get(playlistID) != undefined) {
+
+            const curPlaylists = playlistDB.all;
+
+            let playlistsTable = Object.values(curPlaylists);
+
+            let playlistExist = false;
+            let curFeeds;
+            let targetFeeds;
+
+            let playlist_title;
+            let playlist_description;
+            let playlist_image;
+            let playlist_date;
+
+            for (var i = 0; i < playlistsTable.length; i++) {
+                if (playlistsTable[i]["userEmail"] == userEmail && playlistsTable[i]["title"] == playlistTitle) {
+                    playlistExist = true;
+                    playlist_title = playlistsTable[i]["title"];
+                    playlist_description = playlistsTable[i]["description"];
+                    playlist_image = playlistsTable[i]["image"];
+                    playlist_date = playlistsTable[i]["createdDate"];
+                    curFeeds = playlistsTable[i]["feeds"];
+                    playlistID = i;
+                }
+            }
+
+            targetFeeds = Object.values(curFeeds);
+
+            let newdata = {
+                ID: ID,
+                email: creatorEmail,
+                title: title,
+                description: description,
+                keyword: keywords,
+                category: category,
+                ipfsUrl: video_src,
+                thumbnail: thumbnail,
+                status: status,
+                postDate: postDate,
+                liked: liked,
+                disliked: disliked,
+                watched: watched,
+                shared: shared,
+                postDate: postDate,
+                comments: comments,
+                followers: followers
+            };
+
+            targetFeeds.push(newdata);
+
+
+            if (playlistExist) {
+                await playlistDB.set(playlistID, {
+                    userEmail: userEmail,
+                    feeds: targetFeeds,
+                    image: playlist_image,
+                    title: playlist_title,
+                    description: playlist_description,
+                    createdDate: playlist_date
+                });
+
+                result = await channelDB.get(playlistID);
+                return res.status(200).json({ msg: `Success Added!`, status: true, playListData: result });
+            } else {
+                return res.status(200).json({ msg: `The Playlist is not existing !`, status: false });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `The Playlist is not existing  !`, status: false });
+        }
+
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", PlaylistData: null });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.removeVideoToPlaylist = async (req, res) => {
+    const { userEmail, playlistTitle, ID } = req.body;
+
+    if (playlistDB != undefined) {
+
+        let playlistID = 0;
+
+        if (playlistDB.get(playlistID) != undefined) {
+
+            const curPlaylists = playlistDB.all;
+
+            let playlistsTable = Object.values(curPlaylists);
+
+            let playlistExist = false;
+            let curFeeds;
+            let targetFeeds;
+
+            let playlist_title;
+            let playlist_description;
+            let playlist_image;
+            let playlist_date;
+
+            for (var i = 0; i < playlistsTable.length; i++) {
+                if (playlistsTable[i]["userEmail"] == userEmail && playlistsTable[i]["title"] == playlistTitle) {
+                    playlistExist = true;
+                    playlist_title = playlistsTable[i]["title"];
+                    playlist_description = playlistsTable[i]["description"];
+                    playlist_image = playlistsTable[i]["image"];
+                    playlist_date = playlistsTable[i]["createdDate"];
+                    playlistID = i;
+                    curFeeds = playlistsTable[i]["feeds"];
+                }
+            }
+
+            targetFeeds = Object.values(curFeeds);
+
+            let resultFeeds = targetFeeds.filter(obj => obj["ID"] !== ID);
+
+            if (playlistExist) {
+                await playlistDB.set(playlistID, {
+                    userEmail: userEmail,
+                    feeds: resultFeeds,
+                    image: playlist_image,
+                    title: playlist_title,
+                    description: playlist_description,
+                    createdDate: playlist_date
+                });
+
+                result = await channelDB.get(playlistID);
+                return res.status(200).json({ msg: `Success Deleted!`, status: true, playListData: result });
+            } else {
+                return res.status(200).json({ msg: `The Playlist is not existing !`, status: false });
+            }
+
+        } else {
+            return res.status(200).json({ msg: `The Playlist is not existing  !`, status: false });
+        }
+
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", PlaylistData: null });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////// Save History ////////////////////////////////////
+
+exports.getAllVideoFromPlaylist = async (req, res) => {
+    const { userEmail, playlistTitle } = req.body;
+
+    if (playlistDB != undefined) {
+        let playlistId = 0;
+
+        if (playlistDB.get(playlistId) != undefined) {
+            const curPlaylists = playlistDB.all;
+            const PlaylistData = Object.values(curPlaylists);
+            let playlistExist = false;
+
+            let resultFeeds;
+
+            for (var i = 0; i < playlistsTable.length; i++) {
+                if (PlaylistData[i]["userEmail"] == userEmail && PlaylistData[i]["title"] == playlistTitle) {
+                    playlistExist = true;
+                    resultFeeds = PlaylistData[i]["feeds"]
+                }
+            }
+
+            if (playlistExist) {
+                return res.status(200).json({ msg: "Success !", PlaylistData: resultFeeds, status: true });
+            } else {
+                return res.status(200).json({ msg: "There is no Playlists !", PlaylistData: null, status: false });
+            }
+        } else {
+            return res.status(200).json({ msg: "Playlist is not created ! Ask to Admin !", PlaylistData: null, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", PlaylistData: null, status: false });
+    }
 };
