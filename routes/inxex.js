@@ -57,6 +57,9 @@ router.get("/admin/getAllUsers", Controller.getAllUsers);
 // Get user Profile by email
 router.post("/admin/getUsers", Controller.getUsersByEmail);
 
+// Remove user by admin
+router.post("/admin/removeUser", Controller.removeUser);
+
 // User Register
 router.post("/users/register", Controller.userRegister);
 

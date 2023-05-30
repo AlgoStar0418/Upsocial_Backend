@@ -87,7 +87,7 @@ exports.CreateDBs = async (req, res) => {
         await channelDB.load();
 
         playlistDB = await orbitdb.kvstore("playlistDB", { overwrite: true });
-        await playlistDB.load()
+        await playlistDB.load();
 
         return res.status(200).json({ dbCreated: true });
     } else {
@@ -104,6 +104,37 @@ exports.getAllUsers = (req, res) => {
         const userData = Object.values(curUsers);
 
         return res.status(200).json({ userData: userData });
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
+    }
+};
+
+exports.removeUser = async (req, res) => {
+    const { userEmail } = req.body;
+    if (userDataDB != undefined) {
+        let userId = 0;
+        if (userDataDB.get(userId) != undefined) {
+            let curUsers = userDataDB.all;
+            let userData = Object.values(curUsers);
+            let userExist = false;
+            let resultKey;
+
+            for (var i = 0; i < userData.length; i++) {
+                if (userData[i]["email"] == userEmail) {
+                    resultKey = i;
+                    userExist = true;
+                }
+            }
+
+            if (userExist) {
+                await userDataDB.del(resultKey);
+                return res.status(200).json({ msg: `Success Deleted!`, status: true });
+            } else {
+                return res.status(200).json({ msg: `The User is not existing !`, status: false });
+            }
+        } else {
+            return res.status(200).json({ msg: `This User is not existing  !`, status: false });
+        }
     } else {
         return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
     }
@@ -500,6 +531,9 @@ exports.likeContent = async (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.likeVideos = async (req, res) => {
     const { videoId, userEmail } = req.body;
 
@@ -575,6 +609,9 @@ exports.dislikeContent = async (req, res) => {
     }
 
 };
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 exports.dislikeVideos = async (req, res) => {
     const { videoId, userEmail } = req.body;
@@ -714,7 +751,6 @@ exports.Web_uploadContent = (req, res) => {
         });
     }
 };
-
 
 
 ////////////////////////////////////////////////////////////////////////
