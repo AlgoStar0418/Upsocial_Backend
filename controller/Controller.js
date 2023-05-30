@@ -112,13 +112,13 @@ exports.getAllUsers = (req, res) => {
 exports.removeUser = async (req, res) => {
     const { userEmail } = req.body;
     if (userDataDB != undefined) {
-        let userId = 0;
-        if (userDataDB.get(userId) != undefined) {
-            let curUsers = userDataDB.all;
-            let userData = Object.values(curUsers);
-            let userExist = false;
-            let resultKey;
 
+        let curUsers = userDataDB.all;
+        let userData = Object.values(curUsers);
+        let userExist = false;
+        let resultKey;
+
+        if (userData.length > 0) {
             for (var i = 0; i < userData.length; i++) {
                 if (userData[i]["email"] == userEmail) {
                     resultKey = i;
@@ -133,7 +133,7 @@ exports.removeUser = async (req, res) => {
                 return res.status(200).json({ msg: `The User is not existing !`, status: false });
             }
         } else {
-            return res.status(200).json({ msg: `This User is not existing  !`, status: false });
+            return res.status(200).json({ msg: `The User is not existing !`, status: false });
         }
     } else {
         return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", userData: null });
@@ -145,18 +145,15 @@ exports.removeUser = async (req, res) => {
 
 exports.getUsersByEmail = async (req, res) => {
     const userEmail = req.body.userEmail;
-    let userId = 0;
     if (userDataDB != undefined) {
 
-        if (userDataDB.get(userId) != undefined) {
+        const curUsers = userDataDB.all;
 
-            const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
 
-            let userTable = Object.values(curUsers);
-
-            let userExist = false;
-            let result;
-
+        let userExist = false;
+        let result;
+        if (userTable.length > 0) {
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
                     result = userTable[i];
@@ -192,13 +189,13 @@ exports.userRegister = async (req, res) => {
 
     if (userDataDB != undefined) {
 
-        if (userDataDB.get(userId) != undefined) {
-            const curUsers = userDataDB.all;
-            userId = Object.keys(curUsers).length;
-            let userTable = Object.values(curUsers);
-            let userEmailTable = [];
-            let userExist = false;
+        const curUsers = userDataDB.all;
+        userId = Object.keys(curUsers).length;
+        let userTable = Object.values(curUsers);
+        let userEmailTable = [];
+        let userExist = false;
 
+        if (userId > 0) {
             for (var i = 0; i < userTable.length; i++) {
                 userEmailTable.push(userTable[i]["email"]);
             }
@@ -215,8 +212,6 @@ exports.userRegister = async (req, res) => {
             } else {
                 return res.status(200).json({ msg: `${email} is already registered !`, status: false });
             }
-
-
         } else {
             await userDataDB.put(userId, { username: username, email: email, password: encrypted_password, status: true, following: [], followers: [], Liked: [], Disliked: [] });
             return res.status(200).json({ msg: `${email} is registered success !`, status: true });
@@ -236,11 +231,12 @@ exports.resetPassword = async (req, res) => {
     let userId = 0;
     if (userDataDB != undefined) {
 
-        if (userDataDB.get(userId) != undefined) {
 
-            const curUsers = userDataDB.all;
+        const curUsers = userDataDB.all;
 
-            let userTable = Object.values(curUsers);
+        let userTable = Object.values(curUsers);
+
+        if (userTable.length > 0) {
 
             let userAuth = false;
             let username;
@@ -314,15 +310,11 @@ exports.resetPassword = async (req, res) => {
 exports.verifyCode = async (req, res) => {
     const { userEmail, code } = req.body;
 
-    let userId = 0;
     if (userDataDB != undefined) {
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
 
-        if (userDataDB.get(userId) != undefined) {
-
-            const curUsers = userDataDB.all;
-
-            let userTable = Object.values(curUsers);
-
+        if (userTable.length > 0) {
             let userAuth = false;
 
             for (var i = 0; i < userTable.length; i++) {
@@ -336,7 +328,6 @@ exports.verifyCode = async (req, res) => {
             } else {
                 return res.status(200).json({ msg: `Success! Reset your password!`, status: true });
             }
-
         } else {
             return res.status(200).json({ msg: `Your credentials not found!`, status: false });
         }
@@ -356,11 +347,11 @@ exports.setNewPassword = async (req, res) => {
     let userId = 0;
     if (userDataDB != undefined) {
 
-        if (userDataDB.get(userId) != undefined) {
 
-            const curUsers = userDataDB.all;
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
 
-            let userTable = Object.values(curUsers);
+        if (userTable.length > 0) {
 
             let userExist = false;
 
@@ -390,7 +381,6 @@ exports.setNewPassword = async (req, res) => {
                 await userDataDB.set(userId, { username: username, email: userEmail, password: encrypted_password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked });
                 return res.status(200).json({ msg: `Success!`, status: true });
             }
-
         } else {
             return res.status(200).json({ msg: `You are not registered!`, status: false });
         }
@@ -409,11 +399,10 @@ exports.userLogin = async (req, res) => {
 
     if (userDataDB != undefined) {
 
-        if (userDataDB.get(userId) != undefined) {
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
 
-            const curUsers = userDataDB.all;
-
-            let userTable = Object.values(curUsers);
+        if (userTable.length > 0) {
 
             let userAuth = false;
 
@@ -435,7 +424,6 @@ exports.userLogin = async (req, res) => {
                 const responseData = userDataDB.get(userId);
                 return res.status(200).json({ msg: `Auth success!`, status: true, curUser: email, Data: responseData });
             }
-
         } else {
             return res.status(200).json({ msg: `Your credentials not found!`, status: false });
         }
@@ -485,9 +473,10 @@ exports.likeContent = async (req, res) => {
     const { videoId, userEmail } = req.body;
     let userId = 0;
     if (userDataDB != undefined) {
-        if (userDataDB.get(userId) != undefined) {
-            const curUsers = userDataDB.all;
-            let userTable = Object.values(curUsers);
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
+
+        if (userTable.length > 0) {
             let userExist = false;
             let username;
             let password;
@@ -563,9 +552,9 @@ exports.dislikeContent = async (req, res) => {
     const { videoId, userEmail } = req.body;
     let userId = 0;
     if (userDataDB != undefined) {
-        if (userDataDB.get(userId) != undefined) {
-            const curUsers = userDataDB.all;
-            let userTable = Object.values(curUsers);
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
+        if (userTable.length > 0) {
             let userExist = false;
             let username;
             let password;
@@ -728,10 +717,10 @@ exports.Web_uploadContent = (req, res) => {
 
                 if (contentDB != undefined) {
 
-                    if (contentDB.get(contentID) != undefined) {
-                        const curContents = contentDB.all;
-                        contentID = Object.keys(curContents).length;
+                    const curContents = contentDB.all;
+                    contentID = Object.keys(curContents).length;
 
+                    if (contentID > 0) {
                         await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
 
@@ -758,12 +747,10 @@ exports.Web_uploadContent = (req, res) => {
 
 exports.GetUploadedContent = async (req, res) => {
     const userEmail = req.body.userEmail;
-    const contentId = 0;
     if (contentDB != undefined) {
-
-        if (contentDB.get(contentId) != undefined) {
-            const allContents = contentDB.all;
-            let contentsTable = Object.values(allContents);
+        const allContents = contentDB.all;
+        let contentsTable = Object.values(allContents);
+        if (contentsTable.length > 0) {
             let resultVideos = [];
 
             for (var i = 0; i < contentsTable.length; i++) {
@@ -797,12 +784,10 @@ exports.GetUploadedContentByCategory = (req, res) => {
         targetID = targetCategory.id
     }
 
-    const contentId = 0;
     if (contentDB != undefined) {
-
-        if (contentDB.get(contentId) != undefined) {
-            const allContents = contentDB.all;
-            let contentsTable = Object.values(allContents);
+        const allContents = contentDB.all;
+        let contentsTable = Object.values(allContents);
+        if (contentsTable.length > 0) {
             let resultVideos = [];
 
             for (var i = 0; i < contentsTable.length; i++) {
@@ -827,13 +812,10 @@ exports.GetUploadedContentByCategory = (req, res) => {
 exports.GetAllUploadedContent = (req, res) => {
     let start = 0;
     let limit = req.body.limit;
-    const contentId = 0;
     if (contentDB != undefined) {
-
-        if (contentDB.get(contentId) != undefined) {
-            const allContents = contentDB.all;
-            let contentsTable = Object.values(allContents);
-
+        const allContents = contentDB.all;
+        let contentsTable = Object.values(allContents);
+        if (contentsTable.length > 0) {
             if (limit > contentsTable.length) {
                 return res.status(200).json({ status: true, msg: "success!", data: contentsTable })
             } else {
@@ -856,13 +838,10 @@ exports.changeUserStatus = async (req, res) => {
     const status = req.body.status;
     let userId = 0;
     if (userDataDB != undefined) {
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
 
-        if (userDataDB.get(userId) != undefined) {
-
-            const curUsers = userDataDB.all;
-
-            let userTable = Object.values(curUsers);
-
+        if (userTable.length > 0) {
             let userExist = false;
             let username;
             let password;
@@ -905,14 +884,10 @@ exports.changeUserStatus = async (req, res) => {
 exports.followUser = async (req, res) => {
     const { curUser, tarUser } = req.body;
 
-    let userId = 0;
     if (userDataDB != undefined) {
-
-        if (userDataDB.get(userId) != undefined) {
-
-            const curUsers = userDataDB.all;
-
-            let userTable = Object.values(curUsers);
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
+        if (userTable.length > 0) {
             let flag = false;
 
             let curUserId;
@@ -983,15 +958,10 @@ exports.followUser = async (req, res) => {
 
 exports.unfollowUser = async (req, res) => {
     const { curUser, tarUser } = req.body;
-
-    let userId = 0;
     if (userDataDB != undefined) {
-
-        if (userDataDB.get(userId) != undefined) {
-
-            const curUsers = userDataDB.all;
-
-            let userTable = Object.values(curUsers);
+        const curUsers = userDataDB.all;
+        let userTable = Object.values(curUsers);
+        if (userTable.length > 0) {
             let flag = false;
 
             let curUserId;
@@ -1322,12 +1292,10 @@ exports.uploadPhoto = async (req, res) => {
                 }
                 let userId = 0;
                 if (userDataDB != undefined) {
+                    const curUsers = userDataDB.all;
+                    let userTable = Object.values(curUsers);
 
-                    if (userDataDB.get(userId) != undefined) {
-
-                        const curUsers = userDataDB.all;
-
-                        let userTable = Object.values(curUsers);
+                    if (userTable.length > 0) {
 
                         let userExist = false;
                         let password;
@@ -1395,14 +1363,11 @@ exports.createChannel = async (req, res) => {
                     hashCode: hashCode,
                     size: size,
                 }
-                let channelId = 0;
                 if (channelDB != undefined) {
+                    const curChannels = channelDB.all;
+                    let channelTable = Object.values(curChannels);
 
-                    if (channelDB.get(channelId) != undefined) {
-
-                        const curChannels = channelDB.all;
-
-                        let channelTable = Object.values(curChannels);
+                    if (channelTable.length > 0) {
 
                         let channelExist = false;
 
@@ -1459,11 +1424,9 @@ exports.getChannelByUser = (req, res) => {
     const { userEmail } = req.body;
 
     if (channelDB != undefined) {
-        const channelId = 0;
-
-        if (channelDB.get(channelId) != undefined) {
-            const allChannels = channelDB.all;
-            const channelData = Object.values(allChannels);
+        const allChannels = channelDB.all;
+        const channelData = Object.values(allChannels);
+        if (channelData.length > 0) {
             let result = [];
 
             for (var i = 0; i < channelData.length; i++) {
@@ -1490,11 +1453,9 @@ exports.followChannel = async (req, res) => {
     const { curUser, channelName, aboutChannel, handleUrl, location, tags, url, photo, userEmail } = req.body;
 
     if (channelDB != undefined) {
-        const channelId = 0;
-
-        if (channelDB.get(channelId) != undefined) {
-            const allChannels = channelDB.all;
-            const channelData = Object.values(allChannels);
+        const allChannels = channelDB.all;
+        const channelData = Object.values(allChannels);
+        if (channelData.length > 0) {
             let channelExist = false;
             let result;
             let curFollowers;
@@ -1550,11 +1511,9 @@ exports.unFollowChannel = async (req, res) => {
     const { curUser, channelName, aboutChannel, handleUrl, location, tags, url, photo, userEmail } = req.body;
 
     if (channelDB != undefined) {
-        const channelId = 0;
-
-        if (channelDB.get(channelId) != undefined) {
-            const allChannels = channelDB.all;
-            const channelData = Object.values(allChannels);
+        const allChannels = channelDB.all;
+        const channelData = Object.values(allChannels);
+        if (channelData.length > 0) {
             let channelExist = false;
             let result;
             let curFollowers;
@@ -1629,11 +1588,9 @@ exports.uploadContentsChannel = async (req, res) => {
                 }
 
                 if (channelDB != undefined) {
-                    const channelId = 0;
-
-                    if (channelDB.get(channelId) != undefined) {
-                        const allChannels = channelDB.all;
-                        const channelData = Object.values(allChannels);
+                    const allChannels = channelDB.all;
+                    const channelData = Object.values(allChannels);
+                    if (channelData.length > 0) {
                         let channelExist = false;
                         let result;
                         let curFollowers;
@@ -1743,14 +1700,11 @@ exports.createPlaylist = async (req, res) => {
                     hashCode: hashCode,
                     size: size,
                 }
-                let PlaylistId = 0;
                 if (playlistDB != undefined) {
+                    const curPlaylists = playlistDB.all;
 
-                    if (playlistDB.get(PlaylistId) != undefined) {
-
-                        const curPlaylists = playlistDB.all;
-
-                        let playlistsTable = Object.values(curPlaylists);
+                    let playlistsTable = Object.values(curPlaylists);
+                    if (playlistsTable.length > 0) {
 
                         let playlistExist = false;
 
@@ -1792,14 +1746,13 @@ exports.createPlaylist = async (req, res) => {
 exports.removePlaylist = async (req, res) => {
     // const hash = await db.del('hello');
     const { userEmail, playlistTitle } = req.body;
-    let PlaylistId = 0;
     if (playlistDB != undefined) {
 
-        if (playlistDB.get(PlaylistId) != undefined) {
 
-            const curPlaylists = playlistDB.all;
+        const curPlaylists = playlistDB.all;
 
-            let playlistsTable = Object.values(curPlaylists);
+        let playlistsTable = Object.values(curPlaylists);
+        if (playlistsTable.length > 0) {
 
             let playlistExist = false;
 
@@ -1867,12 +1820,10 @@ exports.addVideoToPlaylist = async (req, res) => {
     if (playlistDB != undefined) {
 
         let playlistID = 0;
+        const curPlaylists = playlistDB.all;
+        let playlistsTable = Object.values(curPlaylists);
 
-        if (playlistDB.get(playlistID) != undefined) {
-
-            const curPlaylists = playlistDB.all;
-
-            let playlistsTable = Object.values(curPlaylists);
+        if (playlistsTable.length > 0) {
 
             let playlistExist = false;
             let curFeeds;
@@ -1954,12 +1905,10 @@ exports.removeVideoToPlaylist = async (req, res) => {
     if (playlistDB != undefined) {
 
         let playlistID = 0;
+        const curPlaylists = playlistDB.all;
+        let playlistsTable = Object.values(curPlaylists);
 
-        if (playlistDB.get(playlistID) != undefined) {
-
-            const curPlaylists = playlistDB.all;
-
-            let playlistsTable = Object.values(curPlaylists);
+        if (playlistsTable.length > 0) {
 
             let playlistExist = false;
             let curFeeds;
@@ -2018,11 +1967,9 @@ exports.getAllVideoFromPlaylist = async (req, res) => {
     const { userEmail, playlistTitle } = req.body;
 
     if (playlistDB != undefined) {
-        let playlistId = 0;
-
-        if (playlistDB.get(playlistId) != undefined) {
-            const curPlaylists = playlistDB.all;
-            const PlaylistData = Object.values(curPlaylists);
+        const curPlaylists = playlistDB.all;
+        const PlaylistData = Object.values(curPlaylists);
+        if (PlaylistData.length > 0) {
             let playlistExist = false;
 
             let resultFeeds;
