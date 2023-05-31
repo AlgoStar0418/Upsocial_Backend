@@ -7,7 +7,6 @@ const fs = require('fs');
 // const youtubedl = require('youtube-dl-exec')
 const { exec } = require('node:child_process');
 const filesize = require("file-size");
-const History = require('../models/history.model');
 
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_KEY);

@@ -13,7 +13,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage })
 
 const DownloadController = require('../controller/download.controller');
-const UserController = require("../controller/user.controller");
+// const UserController = require("../controller/user.controller");
 
 router.post('/generate-ipfs', upload.single('video'), DownloadController.generateIPFS);
 router.get('/upload-video', DownloadController.uploadVideo);
@@ -25,8 +25,8 @@ router.post('/remove-history', DownloadController.removeHistory);
 router.post('/confirm-email', DownloadController.confirmEmail);
 router.post('/check-token', DownloadController.checkToken);
 
-router.post('/login', UserController.login);
-router.post('/restore', UserController.checkAuth);
+// router.post('/login', UserController.login);
+// router.post('/restore', UserController.checkAuth);
 
-router.get('/preview', UserController.preview);
+// router.get('/preview', UserController.preview);
 module.exports = router;
