@@ -1,16 +1,12 @@
 require('dotenv').config();
-const qs = require('qs');
 const axios = require('axios');
-const Config = require("../config/config");
-const Messages = require("../config/messages");
 const moment = require('moment-timezone');
 const fs = require('fs');
-const ytdl = require('ytdl-core');
-const vidl = require('vimeo-downloader');
-const youtubedl = require('youtube-dl-exec')
+// const ytdl = require('ytdl-core');
+// const vidl = require('vimeo-downloader');
+// const youtubedl = require('youtube-dl-exec')
 const { exec } = require('node:child_process');
 const filesize = require("file-size");
-const requestIp = require('request-ip');
 const History = require('../models/history.model');
 
 const sgMail = require('@sendgrid/mail');
