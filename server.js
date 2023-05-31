@@ -40,7 +40,7 @@ app.use(session({
 }));
 
 // Use routes
-// app.use("/api/Upsocial", Route);
+app.use("/api/Upsocial", Route);
 
 // add.upsocial
 app.use('/api', downloadRoute);
