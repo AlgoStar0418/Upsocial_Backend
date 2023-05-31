@@ -3,7 +3,8 @@ var express = require("express");
 var app = express();
 const bodyParser = require("body-parser");
 const port = process.env.PORT;
-const Route = require("./routes/inxex");
+const Route = require("./routes/inxex");// Import Routers.
+const downloadRoute = require('./routes/download.router');
 const cors = require('cors');
 
 
@@ -16,6 +17,9 @@ app.use(express.static("downloads"));
 
 // Use routes
 app.use("/api/Upsocial", Route);
+
+// add.upsocial
+app.use('/api', downloadRoute);
 
 // enable CORS without external module
 app.use(function (req, res, next) {
