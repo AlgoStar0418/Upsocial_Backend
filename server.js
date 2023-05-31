@@ -16,7 +16,7 @@ app.use(bodyParser.json({ limit: '800mb' }));
 app.use(express.static("downloads"));
 
 // Use routes
-app.use("/api/Upsocial", Route);
+// app.use("/api/Upsocial", Route);
 
 // add.upsocial
 app.use('/api', downloadRoute);
