@@ -228,6 +228,65 @@ exports.userRegister = async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+exports.editUser = async (req, res) => {
+    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+    const userRole = req.body.userrole;
+
+    const encrypted_password = await encryptString(password, ENCRYPT_PASS);
+
+    let userId = 0;
+
+    if (userDataDB != undefined) {
+
+        const curUsers = userDataDB.all;
+        userId = Object.keys(curUsers).length;
+        let userTable = Object.values(curUsers);
+        let userEmailTable = [];
+        let userExist = false;
+
+        let ext_status;
+        let ext_following;
+        let ext_followers;
+        let ext_Liked;
+        let ext_Disliked;
+
+        if (userId > 0) {
+            for (var i = 0; i < userTable.length; i++) {
+                userEmailTable.push(userTable[i]["email"]);
+            }
+
+            for (var i = 0; i < userEmailTable.length; i++) {
+                if (userEmailTable[i] == email) {
+                    userExist = true
+                    userId = userTable[i]["ID"];
+                    ext_status = userTable[i]["status"];
+                    ext_following = userTable[i]["following"];
+                    ext_followers = userTable[i]["followers"];
+                    ext_Liked = userTable[i]["Liked"];
+                    ext_Disliked = userTable[i]["Disliked"];
+                }
+            }
+
+            if (!userExist) {
+                return res.status(200).json({ msg: `${email} is not registered yet !`, status: false });
+            } else {
+                await userDataDB.set(userId, { ID: userId, username: username, email: email, password: encrypted_password, ext_status: true, following: ext_following, followers: ext_followers, Liked: ext_Liked, Disliked: ext_Disliked, userrole: userRole });
+                return res.status(200).json({ msg: `${email} is already registered !`, status: true });
+            }
+        } else {
+            return res.status(200).json({ msg: `${email} is not registered yet !`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.resetPassword = async (req, res) => {
 
     const { userEmail } = req.body;

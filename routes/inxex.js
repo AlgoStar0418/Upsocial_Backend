@@ -63,6 +63,9 @@ router.post("/admin/removeUser", Controller.removeUser);
 // User Register
 router.post("/users/register", Controller.userRegister);
 
+// Edit user data
+router.post("/users/edit", Controller.editUser)
+
 // user reset-password
 router.post("/users/reset-password", Controller.resetPassword);
 

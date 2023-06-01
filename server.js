@@ -25,7 +25,7 @@ app.use(function (req, res, next) {
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: '800mb' }));
 app.use(logger('dev'));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ limit: '800mb', extended: true }));
 app.use(bodyParser.json());
 app.use(express.static("downloads"));
 
