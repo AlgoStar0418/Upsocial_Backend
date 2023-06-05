@@ -96,18 +96,18 @@ exports.CreateDBs = async (req, res) => {
 };
 
 exports.recreateDBs = async (req, res) => {
-    console.log("userDataDB===>>>", userDataDB)
-    console.log("contentDB===>>>", contentDB)
-    console.log("channelDB===>>>", channelDB)
-    console.log("playlistDB===>>>", playlistDB)
-    if (userDataDB != undefined && contentDB != undefined && channelDB != undefined && playlistDB != undefined) {
+    if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined) {
+        ipfs = await IPFS.create({
+            EXPERIMENTAL: {
+                pubsub: true,
+            },
+            repo: "UpsocialRepo"
+        });
+
+        orbitdb = await OrbitDB.createInstance(ipfs, {});
+
+        userDataDB = await orbitdb.kvstore("userDB", { overwrite: true });
         await userDataDB.load();
-
-        await contentDB.load();
-
-        await channelDB.load();
-
-        await playlistDB.load();
 
         return res.status(200).json({ dbCreated: true });
     }
