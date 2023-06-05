@@ -67,7 +67,7 @@ let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 /////////////////////////////////////////////////////////////////////////
 
 exports.CreateDBs = async (req, res) => {
-    if (userDataDB == undefined && contentDB == undefined) {
+    if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined) {
         ipfs = await IPFS.create({
             EXPERIMENTAL: {
                 pubsub: true,
@@ -91,6 +91,24 @@ exports.CreateDBs = async (req, res) => {
 
         return res.status(200).json({ dbCreated: true });
     } else {
+        return res.status(200).json({ dbCreated: true });
+    }
+};
+
+exports.recreateDBs = async (req, res) => {
+    console.log("userDataDB===>>>", userDataDB)
+    console.log("contentDB===>>>", contentDB)
+    console.log("channelDB===>>>", channelDB)
+    console.log("playlistDB===>>>", playlistDB)
+    if (userDataDB != undefined && contentDB != undefined && channelDB != undefined && playlistDB != undefined) {
+        await userDataDB.load();
+
+        await contentDB.load();
+
+        await channelDB.load();
+
+        await playlistDB.load();
+
         return res.status(200).json({ dbCreated: true });
     }
 };
