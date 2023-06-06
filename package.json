@@ -41,7 +41,7 @@
     "nodemailer-direct-transport": "^3.3.2",
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^2.0.20",
-    "orbit-db": "^0.26.0",
+    "orbit-db": "^0.24.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "web3": "^1.8.1"
