@@ -95,24 +95,6 @@ exports.CreateDBs = async (req, res) => {
     }
 };
 
-exports.recreateDBs = async (req, res) => {
-    if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined) {
-        ipfs = await IPFS.create({
-            EXPERIMENTAL: {
-                pubsub: true,
-            },
-            repo: "UpsocialRepo"
-        });
-
-        orbitdb = await OrbitDB.createInstance(ipfs, {});
-
-        userDataDB = await orbitdb.kvstore("userDB", { overwrite: true });
-        await userDataDB.load();
-
-        return res.status(200).json({ dbCreated: true });
-    }
-};
-
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 

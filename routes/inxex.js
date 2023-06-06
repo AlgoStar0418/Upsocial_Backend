@@ -51,8 +51,6 @@ var uploadPlaylist = multer({ storage: playlistStorage });
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
 
-router.post("/admin/recreateDB", Controller.recreateDBs);
-
 // Admin: Get all users
 router.get("/admin/getAllUsers", Controller.getAllUsers);
 
