@@ -1,7 +1,7 @@
 require('dotenv').config();
 const OrbitDB = require("orbit-db");
 const axios = require('axios');
-const IPFS = require("ipfs");
+const IPFS = require("ipfs-http-client");
 const { exec } = require('node:child_process');
 const fs = require('fs');
 const filesize = require("file-size");
