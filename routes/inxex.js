@@ -107,6 +107,15 @@ router.post("/users/personalize", Controller.personalized);
 // Upload Content in Web
 router.post("/users/content/web/uploadContent", uploadThumbnail.single('thumbnail'), Controller.Web_uploadContent);
 
+// Set History
+router.post("/users/content/setHistory", Controller.setHistory);
+
+// Get History
+router.post("/users/content/getHistory", Controller.getHistory);
+
+// Watched
+router.post("/users/content/watched", Controller.setWatched);
+
 // Get Uploaded Content by Email
 router.post("/users/get/UploadedContent", Controller.GetUploadedContent);
 
