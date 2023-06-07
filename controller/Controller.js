@@ -602,7 +602,7 @@ exports.likeVideos = async (req, res) => {
 
             let liked = data.liked + 1;
 
-            await contentDB.put(videoId, { ID: videoId, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: liked, disliked: data.disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
+            await contentDB.put(videoId, { ID: videoId, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: liked, disliked: data.disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers, channelName: data.channelName });
 
             return res.status(200).json({ status: true, msg: "success!", data: data })
 
@@ -683,7 +683,7 @@ exports.dislikeVideos = async (req, res) => {
 
             let disliked = data.disliked + 1;
 
-            await contentDB.put(videoId, { ID: videoId, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: data.liked, disliked: disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
+            await contentDB.put(videoId, { ID: videoId, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: data.liked, disliked: disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers, channelName: data.channelName });
 
             return res.status(200).json({ status: true, msg: "success!", data: data })
 
@@ -762,7 +762,7 @@ exports.personalized = async (req, res) => {
 
 exports.Web_uploadContent = (req, res) => {
     const { file } = req;
-    const { title, description, keywords, category, userEmail, video_src } = req.body;
+    const { title, description, keywords, category, userEmail, video_src, channelName } = req.body;
 
     if (file) {
         const addThumbnailProcess = exec(`ipfs add ./thumbnail/${file.filename}`);
@@ -790,11 +790,11 @@ exports.Web_uploadContent = (req, res) => {
                     contentID = Object.keys(curContents).length;
 
                     if (contentID > 0) {
-                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [], channelName: channelName });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
 
                     } else {
-                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [] });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [], channelName: channelName });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
                     }
                 } else {
@@ -1225,7 +1225,7 @@ exports.setWatched = async (req, res) => {
         if (contentDB.get(contentID) != undefined) {
             const data = contentDB.get(contentID);
             let newWatched = data.watched + 1;
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: data.liked, disliked: data.disliked, watched: newWatched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: data.status, liked: data.liked, disliked: data.disliked, watched: newWatched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers, channelName: data.channelName });
 
             return res.status(200).json({ status: true, msg: "success!", data: data })
 
@@ -1250,7 +1250,7 @@ exports.changeContentStatus = async (req, res) => {
         if (contentDB.get(contentID) != undefined) {
             const data = contentDB.get(contentID);
 
-            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: status, liked: data.liked, disliked: data.disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers });
+            await contentDB.put(contentID, { ID: contentID, email: userEmail, title: data.title, description: data.description, keyword: data.keyword, category: data.category, ipfsUrl: data.ipfsUrl, thumbnail: data.thumbnail, status: status, liked: data.liked, disliked: data.disliked, watched: data.watched, shared: data.shared, postDate: data.postDate, comments: data.comments, followers: data.followers, channelName: data.channelName });
 
             return res.status(200).json({ status: true, msg: "success!", data: data })
 
@@ -1849,7 +1849,8 @@ exports.uploadContentsChannel = async (req, res) => {
                             shared: 0,
                             postDate: new Date(),
                             comments: {},
-                            followers: []
+                            followers: [],
+                            channelName: channelName
                         };
 
                         targetContents.push(newdata);
