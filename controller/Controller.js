@@ -810,6 +810,104 @@ exports.Web_uploadContent = (req, res) => {
     }
 };
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.remove_uploadedContent = async (req, res) => {
+    const { userEmail, channelName, ID } = req.body;
+
+    if (channelDB != undefined && contentDB != undefined) {
+        // Contents
+        const curContents = contentDB.all;
+        let contentsTable = Object.values(curContents);
+
+        // Channels
+        const curChannels = channelDB.all;
+        let channelsTable = Object.values(curChannels);
+
+        if (channelName == "Personal Profile") {
+            if (contentDB.get(ID) != undefined) {
+                let isCreator = false;
+                for (var i = 0; i < contentsTable.length; i++) {
+                    if (contentsTable[i]["email"] == userEmail) {
+                        isCreator = true;
+                    }
+                }
+
+                if (isCreator) {
+                    await contentDB.del(ID);
+                    return res.status(200).json({ status: true, msg: "success!" })
+                } else {
+                    return res.status(200).json({ status: false, msg: "you are not creator!" })
+                }
+            } else {
+                return res.status(200).json({ status: false, msg: "No Data", data: null });
+            }
+        } else {
+            if (channelsTable.length > 0) {
+                let channelExist = false;
+                let channelId;
+                let curContents;
+                let targetContents;
+
+                let handleUrl;
+                let aboutChannel;
+                let tags;
+                let location;
+                let url;
+                let photo;
+                let followers;
+
+                for (var i = 0; i < channelsTable.length; i++) {
+                    if (channelsTable[i]["email"] == userEmail && channelsTable[i]["channelName"] == channelName) {
+                        channelExist = true;
+                        channelId = i;
+                        handleUrl = channelsTable[i]["handleUrl"];
+                        aboutChannel = channelsTable[i]["aboutChannel"];
+                        tags = channelsTable[i]["tags"];
+                        location = channelsTable[i]["location"];
+                        url = channelsTable[i]["url"];
+                        photo = channelsTable[i]["photo"];
+                        followers = channelsTable[i]["followers"];
+
+                        curContents = channelsTable[i]["contents"];
+                    }
+                }
+
+                targetContents = Object.values(curContents);
+
+                let resultContents = targetContents.filter(obj => obj["ID"] !== ID);
+
+                if (channelExist) {
+                    await channelDB.set(channelId, {
+                        channelName: channelName,
+                        email: userEmail,
+                        handleUrl: handleUrl,
+                        aboutChannel: aboutChannel,
+                        tags: tags,
+                        location: location,
+                        url: url,
+                        photo: photo,
+                        followers: followers,
+                        contents: resultContents
+                    });
+
+                    result = await channelDB.get(channelId);
+                    return res.status(200).json({ msg: `Success Deleted!`, status: true, channelData: result });
+                } else {
+                    return res.status(200).json({ msg: `The Playlist is not existing !`, status: false });
+                }
+
+            } else {
+                return res.status(200).json({ msg: `The Channel is not existing  !`, status: false });
+            }
+        }
+
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !", status: false });
+    }
+
+};
 
 ////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////

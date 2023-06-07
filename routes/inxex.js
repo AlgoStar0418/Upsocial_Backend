@@ -107,6 +107,9 @@ router.post("/users/personalize", Controller.personalized);
 // Upload Content in Web
 router.post("/users/content/web/uploadContent", uploadThumbnail.single('thumbnail'), Controller.Web_uploadContent);
 
+// Remove uploaded Content in Web
+router.post("/users/content/web/remove/uploadContent", Controller.remove_uploadedContent);
+
 // Set History
 router.post("/users/content/setHistory", Controller.setHistory);
 
