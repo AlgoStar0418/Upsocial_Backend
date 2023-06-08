@@ -8,6 +8,7 @@ const filesize = require("file-size");
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 const { encryptString, decryptString } = require('encrypt-string');
+const crypto = require('crypto');
 
 // recommendation system configure value
 let jsrecommender = require("js-recommender");
@@ -59,6 +60,7 @@ let userDataDB; // User Profile Database
 let contentDB; // Content Management Database
 let channelDB; // Channel Management Database
 let playlistDB; // Playlist Management Database
+let anonymouseDB; // Anonoymouse Users Database
 
 let hashHistories = [];
 
@@ -88,6 +90,9 @@ exports.CreateDBs = async (req, res) => {
 
         playlistDB = await orbitdb.kvstore("playlistDB", { overwrite: true });
         await playlistDB.load();
+
+        anonymouseDB = await orbitdb.kvstore("anonymouseDB", { overwrite: true });
+        await anonymouseDB.load();
 
         return res.status(200).json({ dbCreated: true });
     } else {
@@ -175,6 +180,81 @@ exports.getUsersByEmail = async (req, res) => {
     } else {
         return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
     }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.get20HashCode = async (req, res) => {
+    const { nick_name } = req.body;
+
+    if (anonymouseDB != undefined) {
+        let anonymouseID = 0;
+
+        const curAnonymouse = anonymouseDB.all;
+        anonymouseID = Object.keys(curAnonymouse).length;
+        let anonymouseTable = Object.values(curAnonymouse);
+        let anonymouseExist = false;
+        let exist_code;
+
+        if (anonymouseID > 0) {
+            for (var i = 0; i < anonymouseTable.length; i++) {
+                if (anonymouseTable[i]["nick_name"] == nick_name) {
+                    anonymouseExist = true
+                    exist_code = anonymouseTable[i]["code"];
+                }
+            }
+
+            if (!anonymouseExist) {
+                const hashCode = crypto.randomBytes(20).toString('hex');
+                await anonymouseDB.put(anonymouseID, { ID: anonymouseID, nick_name: nick_name, code: hashCode });
+                return res.status(200).json({ msg: `This is your code: ${hashCode}`, status: true, code: hashCode });
+            } else {
+                return res.status(200).json({ msg: `This is your code: ${hashCode}`, status: true, code: exist_code });
+            }
+        } else {
+            const hashCode = crypto.randomBytes(20).toString('hex');
+            await anonymouseDB.put(anonymouseID, { ID: anonymouseID, nick_name: nick_name, code: hashCode });
+            return res.status(200).json({ msg: `This is your code: ${hashCode}`, status: true, code: hashCode });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
+exports.verify20HashCode = async (req, res) => {
+    const { nick_name, code } = req.body;
+
+    if (anonymouseDB != undefined) {
+        let anonymouseID = 0;
+
+        const curAnonymouse = anonymouseDB.all;
+        anonymouseID = Object.keys(curAnonymouse).length;
+        let anonymouseTable = Object.values(curAnonymouse);
+        let anonymouseExist = false;
+
+        if (anonymouseID > 0) {
+            for (var i = 0; i < anonymouseTable.length; i++) {
+                if (anonymouseTable[i]["nick_name"] == nick_name && anonymouseTable[i]["code"] == code) {
+                    anonymouseExist = true
+                }
+            }
+
+            if (!anonymouseExist) {
+                return res.status(200).json({ msg: `Failed ! Get hash Code first`, status: false });
+            } else {
+                return res.status(200).json({ msg: `Success !`, status: true });
+            }
+        } else {
+            return res.status(200).json({ msg: `Get hash code first !`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+
 };
 
 /////////////////////////////////////////////////////////////////////////

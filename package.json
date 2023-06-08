@@ -18,6 +18,7 @@
     "child_process": "^1.0.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "encrypt-string": "^1.0.0",
     "ethers": "^5.7.2",

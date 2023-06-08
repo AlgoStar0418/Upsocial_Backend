@@ -60,6 +60,12 @@ router.post("/admin/getUsers", Controller.getUsersByEmail);
 // Remove user by admin
 router.post("/admin/removeUser", Controller.removeUser);
 
+// get 20 hash code
+router.post("/anonymouse/get-hash-code", Controller.get20HashCode);
+
+// verify Code
+router.post("/anonymouse/verify-hash-code", Controller.verify20HashCode);
+
 // User Register
 router.post("/users/register", Controller.userRegister);
 
