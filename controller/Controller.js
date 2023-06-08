@@ -205,6 +205,9 @@ exports.get20HashCode = async (req, res) => {
                 }
             }
 
+            console.log(exist_code)
+            console.log(anonymouseDB)
+
             if (!anonymouseExist) {
                 const hashCode = crypto.randomBytes(20).toString('hex');
                 await anonymouseDB.put(anonymouseID, { ID: anonymouseID, nick_name: nick_name, code: hashCode });
