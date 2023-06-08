@@ -213,7 +213,7 @@ exports.get20HashCode = async (req, res) => {
                 await anonymouseDB.put(anonymouseID, { ID: anonymouseID, nick_name: nick_name, code: hashCode });
                 return res.status(200).json({ msg: `This is your code: ${hashCode}`, status: true, code: hashCode });
             } else {
-                return res.status(200).json({ msg: `This is your code: ${hashCode}`, status: true, code: exist_code });
+                return res.status(200).json({ msg: `This is your code: ${exist_code}`, status: true, code: exist_code });
             }
         } else {
             const hashCode = crypto.randomBytes(20).toString('hex');
