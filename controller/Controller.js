@@ -210,13 +210,13 @@ exports.userRegister = async (req, res) => {
             }
 
             if (!userExist) {
-                await userDataDB.put(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: true, following: [], followers: [], Liked: [], Disliked: [], History: [] });
+                await userDataDB.put(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: true, handle: "", description: "", location: "", photo: "", following: [], followers: [], Liked: [], Disliked: [], History: [] });
                 return res.status(200).json({ msg: `${email} is registered success !`, status: true });
             } else {
                 return res.status(200).json({ msg: `${email} is already registered !`, status: false });
             }
         } else {
-            await userDataDB.put(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: true, following: [], followers: [], Liked: [], Disliked: [], History: [] });
+            await userDataDB.put(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: true, handle: "", description: "", location: "", photo: "", following: [], followers: [], Liked: [], Disliked: [], History: [] });
             return res.status(200).json({ msg: `${email} is registered success !`, status: true });
         }
     } else {
@@ -247,6 +247,10 @@ exports.editUser = async (req, res) => {
         let userExist = false;
 
         let ext_status;
+        let ext_handle;
+        let ext_description;
+        let ext_location;
+        let ext_photo;
         let ext_following;
         let ext_followers;
         let ext_Liked;
@@ -263,6 +267,10 @@ exports.editUser = async (req, res) => {
                     userExist = true
                     userId = userTable[i]["ID"];
                     ext_status = userTable[i]["status"];
+                    ext_handle = userTable[i]["handle"];
+                    ext_description = userTable[i]["description"];
+                    ext_location = userTable[i]["location"];
+                    ext_photo = userTable[i]["photo"];
                     ext_following = userTable[i]["following"];
                     ext_followers = userTable[i]["followers"];
                     ext_Liked = userTable[i]["Liked"];
@@ -274,7 +282,7 @@ exports.editUser = async (req, res) => {
             if (!userExist) {
                 return res.status(200).json({ msg: `${email} is not registered yet !`, status: false });
             } else {
-                await userDataDB.set(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: ext_status, following: ext_following, followers: ext_followers, Liked: ext_Liked, Disliked: ext_Disliked, userrole: userRole, History: ext_History });
+                await userDataDB.set(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: ext_status, handle: ext_handle, description: ext_description, location: ext_location, photo: ext_photo, following: ext_following, followers: ext_followers, Liked: ext_Liked, Disliked: ext_Disliked, userrole: userRole, History: ext_History });
                 return res.status(200).json({ msg: `${email} is already registered !`, status: true });
             }
         } else {
@@ -308,6 +316,10 @@ exports.resetPassword = async (req, res) => {
             let following;
             let followers;
             let status;
+            let handle;
+            let description;
+            let location;
+            let photo;
             let liked;
             let disliked;
             let history;
@@ -324,6 +336,10 @@ exports.resetPassword = async (req, res) => {
                     liked = userTable[i]["Liked"];
                     disliked = userTable[i]["Disliked"];
                     status = userTable[i]["status"];
+                    handle = userTable[i]["handle"];
+                    description = userTable[i]["description"];
+                    location = userTable[i]["location"];
+                    photo = userTable[i]["photo"];
                     history = userTable[i]["History"];
                 }
             }
@@ -333,7 +349,7 @@ exports.resetPassword = async (req, res) => {
             } else {
 
                 const code = await generateRandomString(6);
-                await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked, code: code, History: history });
+                await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, handle: handle, description: description, photo: photo, location: location, following: following, followers: followers, Liked: liked, Disliked: disliked, code: code, History: history });
 
                 var transport = nodemailer.createTransport(
                     smtpTransport({
@@ -423,6 +439,10 @@ exports.setNewPassword = async (req, res) => {
 
             let username;
             let status;
+            let handle;
+            let description;
+            let location;
+            let photo;
             let following;
             let followers;
             let liked;
@@ -439,6 +459,10 @@ exports.setNewPassword = async (req, res) => {
                     liked = userTable[i]["Liked"];
                     disliked = userTable[i]["Disliked"];
                     history = userTable[i]["History"];
+                    handle = userTable[i]["handle"];
+                    description = userTable[i]["description"];
+                    location = userTable[i]["location"];
+                    photo = userTable[i]["photo"];
                     userExist = true;
                 }
             }
@@ -446,7 +470,7 @@ exports.setNewPassword = async (req, res) => {
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
-                await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: encrypted_password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history }); return res.status(200).json({ msg: `Success!`, status: true });
+                await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: encrypted_password, status: status, handle: handle, description: description, location: location, photo: photo, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history }); return res.status(200).json({ msg: `Success!`, status: true });
             }
         } else {
             return res.status(200).json({ msg: `You are not registered!`, status: false });
@@ -553,6 +577,10 @@ exports.likeContent = async (req, res) => {
             let disliked;
             let history;
             let status;
+            let handle;
+            let description;
+            let location;
+            let photo;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
@@ -565,6 +593,10 @@ exports.likeContent = async (req, res) => {
                     disliked = userTable[i]["Disliked"];
                     status = userTable[i]["status"];
                     history = userTable[i]["History"];
+                    handle = userTable[i]["handle"];
+                    description = userTable[i]["description"];
+                    location = userTable[i]["location"];
+                    photo = userTable[i]["photo"];
                     userExist = true;
                 }
             }
@@ -576,7 +608,7 @@ exports.likeContent = async (req, res) => {
                     return res.status(200).json({ msg: `You already liked this video !`, status: true });
                 } else {
                     liked.push(videoId);
-                    await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history });
+                    await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, handle: handle, description: description, location: location, photo: photo, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history });
                     return res.status(200).json({ msg: `Liked this video successful !`, status: true });
                 }
             }
@@ -633,6 +665,10 @@ exports.dislikeContent = async (req, res) => {
             let disliked;
             let history;
             let status;
+            let handle;
+            let description;
+            let location;
+            let photo;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
@@ -645,6 +681,10 @@ exports.dislikeContent = async (req, res) => {
                     disliked = userTable[i]["Disliked"];
                     history = userTable[i]["History"];
                     status = userTable[i]["status"];
+                    handle = userTable[i]["handle"];
+                    description = userTable[i]["description"];
+                    location = userTable[i]["location"];
+                    photo = userTable[i]["photo"];
                     userExist = true;
                 }
             }
@@ -656,7 +696,7 @@ exports.dislikeContent = async (req, res) => {
                     return res.status(200).json({ msg: `You already liked this video !`, status: true });
                 } else {
                     disliked.push(videoId);
-                    await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history });
+                    await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, handle: handle, description: description, location: location, photo: photo, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history });
                     return res.status(200).json({ msg: `Liked this video successful !`, status: true });
                 }
             }
@@ -1017,6 +1057,10 @@ exports.changeUserStatus = async (req, res) => {
             let liked;
             let disliked;
             let history;
+            let handle;
+            let description;
+            let location;
+            let photo;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == userEmail) {
@@ -1028,6 +1072,10 @@ exports.changeUserStatus = async (req, res) => {
                     liked = userTable[i]["Liked"];
                     disliked = userTable[i]["Disliked"];
                     history = userTable[i]["History"];
+                    handle = userTable[i]["handle"]
+                    description = userTable[i]["description"]
+                    location = userTable[i]["location"]
+                    photo = userTable[i]["photo"]
                     userExist = true;
                 }
             }
@@ -1035,7 +1083,7 @@ exports.changeUserStatus = async (req, res) => {
             if (!userExist) {
                 return res.status(200).json({ msg: `User is not registered!`, status: false });
             } else {
-                await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history });
+                await userDataDB.set(userId, { ID: userId, username: username, email: userEmail, password: password, status: status, handle: handle, location: location, description: description, photo: photo, following: following, followers: followers, Liked: liked, Disliked: disliked, History: history });
                 return res.status(200).json({ msg: `Success!`, status: true });
             }
 
@@ -1068,6 +1116,10 @@ exports.followUser = async (req, res) => {
             let curLiked;
             let curDisliked;
             let curHistory;
+            let curhandle;
+            let curdescription;
+            let curlocation;
+            let curphoto;
 
             let tarUserId;
             let tarUsername;
@@ -1078,6 +1130,10 @@ exports.followUser = async (req, res) => {
             let tarLiked;
             let tarDisliked;
             let tarHistory;
+            let tarhandle;
+            let tardescription;
+            let tarlocation;
+            let tarphoto;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == curUser) {
@@ -1090,6 +1146,10 @@ exports.followUser = async (req, res) => {
                     curLiked = userTable[i]["Liked"];
                     curDisliked = userTable[i]["Disliked"];
                     curHistory = userTable[i]["History"];
+                    curhandle = userTable[i]["handle"];
+                    curdescription = userTable[i]["description"];
+                    curlocation = userTable[i]["location"];
+                    curphoto = userTable[i]["photo"];
                 }
                 if (userTable[i]["email"] == tarUser) {
                     tarUserId = userTable[i]["ID"];
@@ -1101,6 +1161,10 @@ exports.followUser = async (req, res) => {
                     tarLiked = userTable[i]["Liked"];
                     tarDisliked = userTable[i]["Disliked"];
                     tarHistory = userTable[i]["History"];
+                    tarhandle = userTable[i]["handle"];
+                    tardescription = userTable[i]["description"];
+                    tarlocation = userTable[i]["location"];
+                    tarphoto = userTable[i]["photo"];
                 }
             }
 
@@ -1113,8 +1177,8 @@ exports.followUser = async (req, res) => {
             } else {
                 curFollowing.push(tarUser);
                 tarFollowers.push(curUser);
-                await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
-                await userDataDB.set(tarUserId, { ID: tarUserId, username: tarUsername, email: tarUser, password: tarPassword, status: tarStatus, following: tarFollowing, followers: tarFollowers, Liked: tarLiked, Disliked: tarDisliked, History: tarHistory });
+                await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, handle: curhandle, description: curdescription, location: curlocation, photo: curphoto, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
+                await userDataDB.set(tarUserId, { ID: tarUserId, username: tarUsername, email: tarUser, password: tarPassword, status: tarStatus, handle: tarhandle, description: tardescription, location: tarlocation, photo: tarphoto, following: tarFollowing, followers: tarFollowers, Liked: tarLiked, Disliked: tarDisliked, History: tarHistory });
                 return res.status(200).json({ msg: `Follow Successful!`, status: true });
             }
 
@@ -1148,6 +1212,10 @@ exports.setHistory = async (req, res) => {
             let curLiked;
             let curDisliked;
             let curHistory;
+            let curhandle;
+            let curdescription;
+            let curlocation;
+            let curphoto;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == curUser) {
@@ -1160,6 +1228,10 @@ exports.setHistory = async (req, res) => {
                     curLiked = userTable[i]["Liked"];
                     curDisliked = userTable[i]["Disliked"];
                     curHistory = userTable[i]["History"];
+                    curhandle = userTable[i]["handle"];
+                    curdescription = userTable[i]["description"];
+                    curlocation = userTable[i]["location"];
+                    curphoto = userTable[i]["photo"];
                     flag = true;
                 }
             }
@@ -1185,7 +1257,7 @@ exports.setHistory = async (req, res) => {
                     viewDate: new Date()
                 };
                 curHistory.push(newHistory);
-                await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
+                await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, handle: curhandle, description: curdescription, location: curlocation, photo: curphoto, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
                 return res.status(200).json({ msg: `Follow Successful!`, status: true });
             } else {
                 return res.status(200).json({ msg: `You are not registered !`, status: false });
@@ -1254,6 +1326,10 @@ exports.unfollowUser = async (req, res) => {
             let curLiked;
             let curDisliked;
             let curHistory;
+            let curhandle;
+            let curdescription;
+            let curlocation;
+            let curphoto;
 
             let tarUserId;
             let tarUsername;
@@ -1264,6 +1340,10 @@ exports.unfollowUser = async (req, res) => {
             let tarLiked;
             let tarDisliked;
             let tarHistory;
+            let tarhandle;
+            let tardescription;
+            let tarlocation;
+            let tarphoto;
 
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == curUser) {
@@ -1276,6 +1356,10 @@ exports.unfollowUser = async (req, res) => {
                     curLiked = userTable[i]["Liked"];
                     curDisliked = userTable[i]["Disliked"];
                     curHistory = userTable[i]["History"];
+                    curhandle = userTable[i]["handle"];
+                    curdescription = userTable[i]["description"];
+                    curlocation = userTable[i]["location"];
+                    curphoto = userTable[i]["photo"];
                 }
                 if (userTable[i]["email"] == tarUser) {
                     tarUserId = userTable[i]["ID"];
@@ -1287,6 +1371,10 @@ exports.unfollowUser = async (req, res) => {
                     tarLiked = userTable[i]["Liked"];
                     tarDisliked = userTable[i]["Disliked"];
                     tarHistory = userTable[i]["History"];
+                    tarhandle = userTable[i]["handle"];
+                    tardescription = userTable[i]["description"];
+                    tarlocation = userTable[i]["location"];
+                    tarphoto = userTable[i]["photo"];
                 }
             }
 
@@ -1297,8 +1385,8 @@ exports.unfollowUser = async (req, res) => {
             if (flag) {
                 curFollowing.splice(curFollowing.indexOf(tarUser), 1);
                 tarFollowers.splice(curFollowing.indexOf(curUser), 1);
-                await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
-                await userDataDB.set(tarUserId, { ID: tarUserId, username: tarUsername, email: tarUser, password: tarPassword, status: tarStatus, following: tarFollowing, followers: tarFollowers, Liked: tarLiked, Disliked: tarDisliked, History: tarHistory });
+                await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, handle: curhandle, description: curdescription, location: curlocation, photo: curphoto, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
+                await userDataDB.set(tarUserId, { ID: tarUserId, username: tarUsername, email: tarUser, password: tarPassword, status: tarStatus, handle: tarhandle, description: tardescription, location: tarlocation, photo: tarphoto, following: tarFollowing, followers: tarFollowers, Liked: tarLiked, Disliked: tarDisliked, History: tarHistory });
                 return res.status(200).json({ msg: `unFollow Successful!`, status: true });
             } else {
                 return res.status(200).json({ msg: `You didn't followed yet!`, status: false });
