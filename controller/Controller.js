@@ -204,10 +204,6 @@ exports.get20HashCode = async (req, res) => {
                     exist_code = anonymouseTable[i]["code"];
                 }
             }
-
-            console.log(exist_code)
-            console.log(anonymouseDB)
-
             if (!anonymouseExist) {
                 const hashCode = crypto.randomBytes(20).toString('hex');
                 await anonymouseDB.put(anonymouseID, { ID: anonymouseID, nick_name: nick_name, code: hashCode });
@@ -1569,7 +1565,7 @@ exports.generateIPFS = async (req, res) => {
                     ip,
                     email
                 }
-                // saveHistory(data);
+                saveHistory(data);
                 return res.json({
                     result: true,
                     data: data
