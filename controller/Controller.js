@@ -224,6 +224,42 @@ exports.get20HashCode = async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+exports.getNameHashCode = async (req, res) => {
+    const { nick_name } = req.body;
+
+    if (anonymouseDB != undefined) {
+        let anonymouseID = 0;
+
+        const curAnonymouse = anonymouseDB.all;
+        anonymouseID = Object.keys(curAnonymouse).length;
+        let anonymouseTable = Object.values(curAnonymouse);
+        let anonymouseExist = false;
+        let anonymouseCode;
+
+        if (anonymouseID > 0) {
+            for (var i = 0; i < anonymouseTable.length; i++) {
+                if (anonymouseTable[i]["nick_name"] == nick_name) {
+                    anonymouseExist = true;
+                    anonymouseCode = anonymouseTable[i]["code"];
+                }
+            }
+
+            if (!anonymouseExist) {
+                return res.status(200).json({ msg: `Failed ! Get hash Code first`, status: false });
+            } else {
+                return res.status(200).json({ msg: `Success !`, status: true, code: anonymouseCode });
+            }
+        } else {
+            return res.status(200).json({ msg: `Get hash code first !`, status: false });
+        }
+    } else {
+        return res.status(200).json({ msg: "DB is not created ! Ask to Admin !" });
+    }
+};
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 exports.verify20HashCode = async (req, res) => {
     const { nick_name, code } = req.body;
 

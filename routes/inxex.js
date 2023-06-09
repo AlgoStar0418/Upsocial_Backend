@@ -63,6 +63,9 @@ router.post("/admin/removeUser", Controller.removeUser);
 // get 20 hash code
 router.post("/anonymouse/get-hash-code", Controller.get20HashCode);
 
+// get user nick name from hash code
+router.post("/anonymouse/get-name-hashcode", Controller.getNameHashCode);
+
 // verify Code
 router.post("/anonymouse/verify-hash-code", Controller.verify20HashCode);
 
