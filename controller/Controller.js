@@ -225,7 +225,7 @@ exports.get20HashCode = async (req, res) => {
 /////////////////////////////////////////////////////////////////////////
 
 exports.getNameHashCode = async (req, res) => {
-    const { nick_name } = req.body;
+    const { code } = req.body;
 
     if (anonymouseDB != undefined) {
         let anonymouseID = 0;
@@ -234,20 +234,20 @@ exports.getNameHashCode = async (req, res) => {
         anonymouseID = Object.keys(curAnonymouse).length;
         let anonymouseTable = Object.values(curAnonymouse);
         let anonymouseExist = false;
-        let anonymouseCode;
+        let anonymouseName;
 
         if (anonymouseID > 0) {
             for (var i = 0; i < anonymouseTable.length; i++) {
-                if (anonymouseTable[i]["nick_name"] == nick_name) {
+                if (anonymouseTable[i]["code"] == code) {
                     anonymouseExist = true;
-                    anonymouseCode = anonymouseTable[i]["code"];
+                    anonymouseName = anonymouseTable[i]["nick_name"];
                 }
             }
 
             if (!anonymouseExist) {
                 return res.status(200).json({ msg: `Failed ! Get hash Code first`, status: false });
             } else {
-                return res.status(200).json({ msg: `Success !`, status: true, code: anonymouseCode });
+                return res.status(200).json({ msg: `Success !`, status: true, name: anonymouseName });
             }
         } else {
             return res.status(200).json({ msg: `Get hash code first !`, status: false });
