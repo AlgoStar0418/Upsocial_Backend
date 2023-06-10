@@ -1655,7 +1655,7 @@ exports.generateIPFS = async (req, res) => {
                                 ip,
                                 email
                             }
-                            saveHistory(data);
+                            // saveHistory(data);
                             return res.json({
                                 result: true,
                                 data: data
