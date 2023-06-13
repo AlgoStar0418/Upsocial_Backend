@@ -14,6 +14,7 @@ const crypto = require('crypto');
 let jsrecommender = require("js-recommender");
 let recommender = new jsrecommender.Recommender();
 let table = new jsrecommender.Table();
+let converting = [];
 
 const generateRandomString = length => {
     let result = '';
@@ -1695,7 +1696,7 @@ exports.generateIPFS = async (req, res) => {
                                         hashCode: hashCode,
                                         email
                                     }
-                                    saveHistory(data);
+                                    // saveHistory(data);
                                     return res.json({
                                         result: true,
                                         data: data
