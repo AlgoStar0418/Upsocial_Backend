@@ -53,7 +53,7 @@ async function generateIPFS(req, res) {
           ip,
           email
         }
-        saveHistory(data);
+        // saveHistory(data);
         return res.json({
           result: true,
           data: data
@@ -107,7 +107,7 @@ async function generateIPFS(req, res) {
                 ip,
                 email
               }
-              saveHistory(data);
+              // saveHistory(data);
               return res.json({
                 result: true,
                 data: data
@@ -147,7 +147,7 @@ async function generateIPFS(req, res) {
                     hashCode: hashCode,
                     email
                   }
-                  saveHistory(data);
+                  // saveHistory(data);
                   return res.json({
                     result: true,
                     data: data
@@ -445,7 +445,7 @@ async function uploadVideo(req, res) {
               hashCode: hashCode,
               email: ""
             }
-            saveHistory(data);
+            // saveHistory(data);
             return res.status(200).json({ data: data });
             // return res.json({
             //   result: true,
