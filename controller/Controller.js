@@ -77,11 +77,16 @@ exports.CreateDBs = async (req, res) => {
             },
             repo: "UpsocialRepo"
         });
+        console.log("here 1 !");
 
         orbitdb = await OrbitDB.createInstance(ipfs, {});
 
+        console.log("here 2 !");
+
         userDataDB = await orbitdb.kvstore("userDB", { overwrite: true });
         await userDataDB.load();
+
+        console.log("here 3 !");
 
         contentDB = await orbitdb.kvstore("contentDB", { overwrite: true });
         await contentDB.load();
@@ -95,16 +100,11 @@ exports.CreateDBs = async (req, res) => {
         anonymouseDB = await orbitdb.kvstore("anonymouseDB", { overwrite: true });
         await anonymouseDB.load();
 
+        console.log("here 4 !");
+
         return res.status(200).json({ dbCreated: true });
     } else {
-        orbitdb = await OrbitDB.createInstance(ipfs, {});
-
-        userDataDB = await orbitdb.open("userDB");
-        contentDB = await orbitdb.open("contentDB");
-        channelDB = await orbitdb.open("channelDB");
-        playlistDB = await orbitdb.open("playlistDB");
-        anonymouseDB = await orbitdb.open("anonymouseDB");
-
+        console.log("here 5 !");
         return res.status(200).json({ dbLoaded: true });
     }
 };
