@@ -100,9 +100,6 @@ router.post("/users/unfollow", Controller.unfollowUser);
 // Set user's content status (Active and ban)
 router.post("/users/set/content/ChangeStatus", Controller.changeContentStatus);
 
-// Upload Content
-router.post("/users/content/uploadContent", Controller.uploadContent);
-
 // Like Content
 router.post("/users/content/like", Controller.likeContent);
 router.post("/content/like", Controller.likeVideos);
