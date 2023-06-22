@@ -69,66 +69,6 @@ let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
-exports.testCreateDB = async (req, res) => {
-    if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined) {
-        const ipfs = await IPFS.create();
-
-        orbitdb = await OrbitDB.createInstance(ipfs, { directory: './orbitdb', });
-
-
-        userDataDB = await orbitdb.kvstore("userDB", {
-            overwrite: true,
-            storeType: 'leveldb'
-        });
-        await userDataDB.load();
-
-        contentDB = await orbitdb.kvstore("contentDB", {
-            overwrite: true,
-            storeType: 'leveldb'
-        });
-        await contentDB.load();
-
-        channelDB = await orbitdb.kvstore("channelDB", {
-            overwrite: true,
-            storeType: 'leveldb'
-        });
-        await channelDB.load();
-
-        playlistDB = await orbitdb.kvstore("playlistDB", {
-            overwrite: true,
-            storeType: 'leveldb'
-        });
-        await playlistDB.load();
-
-        anonymouseDB = await orbitdb.kvstore("anonymouseDB", {
-            overwrite: true,
-            storeType: 'leveldb'
-        });
-        await anonymouseDB.load();
-
-        return res.status(200).json({ dbCreated: true });
-    } else {
-        return res.status(200).json({ dbCreated: true });
-    }
-};
-
-exports.loadDatabase = async (req, res) => {
-
-    const ipfs = await IPFS.create();
-    const orbitdb = await OrbitDB.createInstance(ipfs, {
-        directory: './orbitdb',
-    });
-
-    userDataDB = await orbitdb.open('userDB');
-    contentDB = await orbitdb.open('contentDB');
-    channelDB = await orbitdb.open('channelDB');
-    playlistDB = await orbitdb.open('playlistDB');
-    anonymouseDB = await orbitdb.open('anonymouseDB');
-
-    return res.status(200).json({ dbCreated: true });
-
-};
-
 exports.CreateDBs = async (req, res) => {
     if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined && anonymouseDB == undefined) {
         ipfs = await IPFS.create({
@@ -157,7 +97,15 @@ exports.CreateDBs = async (req, res) => {
 
         return res.status(200).json({ dbCreated: true });
     } else {
-        return res.status(200).json({ dbCreated: true });
+        orbitdb = await OrbitDB.createInstance(ipfs, {});
+
+        userDataDB = await orbitdb.open("userDB");
+        contentDB = await orbitdb.open("contentDB");
+        channelDB = await orbitdb.open("channelDB");
+        playlistDB = await orbitdb.open("playlistDB");
+        anonymouseDB = await orbitdb.open("anonymouseDB");
+
+        return res.status(200).json({ dbLoaded: true });
     }
 };
 
