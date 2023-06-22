@@ -1315,6 +1315,8 @@ exports.setHistory = async (req, res) => {
             let curlocation;
             let curphoto;
 
+            let viewdate = new Date();
+
             for (var i = 0; i < userTable.length; i++) {
                 if (userTable[i]["email"] == curUser) {
                     curUserId = userTable[i]["ID"];
@@ -1352,7 +1354,7 @@ exports.setHistory = async (req, res) => {
                     thumbnail: thumbnail,
                     title: title,
                     watched: watched,
-                    viewDate: new Date()
+                    viewDate: viewdate.toString()
                 };
                 curHistory.push(newHistory);
                 await userDataDB.set(curUserId, { ID: curUserId, username: curUsername, email: curUser, password: curPassword, status: curStatus, handle: curhandle, description: curdescription, location: curlocation, photo: curphoto, following: curFollowing, followers: curFollowers, Liked: curLiked, Disliked: curDisliked, History: curHistory });
@@ -2095,6 +2097,8 @@ exports.uploadContentsChannel = async (req, res) => {
                         let url;
                         let photo;
 
+                        let postdata = new Date();
+
                         for (var i = 0; i < channelData.length; i++) {
                             if (channelData[i]["email"] == channelAdmin && channelData[i]["channelName"] == channelName) {
                                 id = i;
@@ -2125,7 +2129,7 @@ exports.uploadContentsChannel = async (req, res) => {
                             disliked: 0,
                             watched: 0,
                             shared: 0,
-                            postDate: new Date(),
+                            postDate: postdata.toString(),
                             comments: {},
                             followers: [],
                             channelName: channelName
@@ -2198,6 +2202,7 @@ exports.createPlaylist = async (req, res) => {
                     if (playlistsTable.length > 0) {
 
                         let playlistExist = false;
+                        let createddate = new Date();
 
                         for (var i = 0; i < playlistsTable.length; i++) {
                             if (playlistsTable[i]["userEmail"] == userEmail && playlistsTable[i]["title"] == playlistTitle) {
@@ -2210,12 +2215,12 @@ exports.createPlaylist = async (req, res) => {
                         } else {
                             let id = playlistsTable.length;
 
-                            await playlistDB.set(id, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: new Date() });
+                            await playlistDB.set(id, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
                             return res.status(200).json({ msg: `Creating playlist is success!`, status: true });
                         }
 
                     } else {
-                        await playlistDB.set(0, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: new Date() });
+                        await playlistDB.set(0, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
                         return res.status(200).json({ msg: `Creating playlist is successful!`, status: true });
                     }
                 } else {
