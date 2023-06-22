@@ -77,46 +77,31 @@ exports.testCreateDB = async (req, res) => {
 
 
         userDataDB = await orbitdb.kvstore("userDB", {
-            create: true,
             overwrite: true,
-            localOnly: false,
-            type: 'docstore',
             storeType: 'leveldb'
         });
         await userDataDB.load();
 
         contentDB = await orbitdb.kvstore("contentDB", {
-            create: true,
             overwrite: true,
-            localOnly: false,
-            type: 'docstore',
             storeType: 'leveldb'
         });
         await contentDB.load();
 
         channelDB = await orbitdb.kvstore("channelDB", {
-            create: true,
             overwrite: true,
-            localOnly: false,
-            type: 'docstore',
             storeType: 'leveldb'
         });
         await channelDB.load();
 
         playlistDB = await orbitdb.kvstore("playlistDB", {
-            create: true,
             overwrite: true,
-            localOnly: false,
-            type: 'docstore',
             storeType: 'leveldb'
         });
         await playlistDB.load();
 
         anonymouseDB = await orbitdb.kvstore("anonymouseDB", {
-            create: true,
             overwrite: true,
-            localOnly: false,
-            type: 'docstore',
             storeType: 'leveldb'
         });
         await anonymouseDB.load();
