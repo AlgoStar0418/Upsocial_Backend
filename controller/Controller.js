@@ -91,16 +91,22 @@ exports.CreateDBs = async (req, res) => {
         contentDB = await orbitdb.kvstore("contentDB", { overwrite: true });
         await contentDB.load();
 
+        console.log("here 4 !");
+
         channelDB = await orbitdb.kvstore("channelDB", { overwrite: true });
         await channelDB.load();
+
+        console.log("here 5 !");
 
         playlistDB = await orbitdb.kvstore("playlistDB", { overwrite: true });
         await playlistDB.load();
 
+        console.log("here 6 !");
+
         anonymouseDB = await orbitdb.kvstore("anonymouseDB", { overwrite: true });
         await anonymouseDB.load();
 
-        console.log("here 4 !");
+        console.log("here 7 !");
 
         return res.status(200).json({ dbCreated: true });
     } else {
