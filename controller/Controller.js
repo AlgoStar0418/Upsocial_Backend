@@ -69,6 +69,72 @@ let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
+exports.testCreateDB = async (req, res) => {
+    if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined) {
+        ipfs = await IPFS.create({
+            EXPERIMENTAL: {
+                pubsub: true,
+            },
+            repo: "UpsocialRepo"
+        });
+
+        orbitdb = await OrbitDB.createInstance(ipfs, {});
+
+
+        userDataDB = await orbitdb.kvstore("userDB", { overwrite: true });
+        await userDataDB.load();
+        const userDataDBsnapshot = await userDataDB.createSnapshot();
+        fs.writeFileSync('/userDataDBsnapshot.txt', userDataDBsnapshot);
+
+        contentDB = await orbitdb.kvstore("contentDB", { overwrite: true });
+        await contentDB.load();
+        const contentDBsnapshot = await contentDB.createSnapshot();
+        fs.writeFileSync('/contentDBsnapshot.txt', contentDBsnapshot);
+
+        channelDB = await orbitdb.kvstore("channelDB", { overwrite: true });
+        await channelDB.load();
+        const channelDBsnapshot = await channelDB.createSnapshot();
+        fs.writeFileSync('/channelDBsnapshot.txt', channelDBsnapshot);
+
+        playlistDB = await orbitdb.kvstore("playlistDB", { overwrite: true });
+        await playlistDB.load();
+        const playlistDBsnapshot = await playlistDB.createSnapshot();
+        fs.writeFileSync('/playlistDBsnapshot.txt', playlistDBsnapshot);
+
+        anonymouseDB = await orbitdb.kvstore("anonymouseDB", { overwrite: true });
+        await anonymouseDB.load();
+        const anonymouseDBsnapshot = await anonymouseDB.createSnapshot();
+        fs.writeFileSync('/anonymouseDBsnapshot.txt', anonymouseDBsnapshot);
+
+        return res.status(200).json({ dbCreated: true });
+    } else {
+        return res.status(200).json({ dbCreated: true });
+    }
+};
+
+exports.loadDatabase = async (req, res) => {
+    const userDataDBsnapshot = fs.readFileSync('/userDataDBsnapshot.txt', 'utf8');
+    await userDataDB.loadFromSnapshot(userDataDBsnapshot);
+
+
+    const contentDBsnapshot = fs.readFileSync('/contentDBsnapshot.txt', 'utf8');
+    await contentDB.loadFromSnapshot(contentDBsnapshot);
+
+
+    const channelDBsnapshot = fs.readFileSync('/channelDBsnapshot.txt', 'utf8');
+    await channelDB.loadFromSnapshot(channelDBsnapshot);
+
+
+    const playlistDBsnapshot = fs.readFileSync('/playlistDBsnapshot.txt', 'utf8');
+    await playlistDB.loadFromSnapshot(playlistDBsnapshot);
+
+    const anonymouseDBsnapshot = fs.readFileSync('/anonymouseDBsnapshot.txt', 'utf8');
+    await anonymouseDB.loadFromSnapshot(anonymouseDBsnapshot);
+
+    return res.status(200).json({ dbCreated: true });
+
+};
+
 exports.CreateDBs = async (req, res) => {
     if (userDataDB == undefined && contentDB == undefined && channelDB == undefined && playlistDB == undefined) {
         ipfs = await IPFS.create({

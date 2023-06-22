@@ -48,6 +48,10 @@ var playlistStorage = multer.diskStorage({
 });
 var uploadPlaylist = multer({ storage: playlistStorage });
 
+
+router.post("/admin/testCreateDB", Controller.testCreateDB);
+router.post("/admin/loadDatabase", Controller.loadDatabase);
+
 // Admin: Create IPFS instance, and Orbit DB
 router.post("/admin/createDB", Controller.CreateDBs);
 
