@@ -63,7 +63,7 @@ let channelDB; // Channel Management Database
 let playlistDB; // Playlist Management Database
 let anonymouseDB; // Anonoymouse Users Database
 
-let hashHistories = [];
+// let hashHistories = [];
 
 let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 /////////////////////////////////////////////////////////////////////////
@@ -1586,19 +1586,18 @@ exports.generateIPFS = async (req, res) => {
     const { file } = req;
     const ip = req.headers['x-real-ip'] || '';
 
-    let histories = [];
-    for (let i = 0; i < hashHistories.length; i++) {
-        const jsonData = await axios({
-            method: 'get',
-            url: `${process.env.IPFS_BASE_URL}/${hashHistories[i].jsonHashCode}`
-        });
-        if (jsonData && jsonData.data) {
-            histories.push(jsonData.data);
-        }
-    }
+    // let histories = [];
+    // for (let i = 0; i < hashHistories.length; i++) {
+    //     const jsonData = await axios({
+    //         method: 'get',
+    //         url: `${process.env.IPFS_BASE_URL}/${hashHistories[i].jsonHashCode}`
+    //     });
+    //     if (jsonData && jsonData.data) {
+    //         histories.push(jsonData.data);
+    //     }
+    // }
 
     if (file) {
-        console.log('ipfs add ==========>', `ipfs add ./downloads/${file.filename}`);
         const addVideoProcess = exec(`ipfs add ./downloads/${file.filename}`);
 
         addVideoProcess.stdout.on('data', async function (result) {
@@ -1624,7 +1623,6 @@ exports.generateIPFS = async (req, res) => {
             }
         });
     } else {
-        console.log('start downloading =========>', url, timestamp);
         let type = 'youtube';
         let videoId = '';
         if (url.indexOf('vimeo') >= 0) {
@@ -1636,7 +1634,6 @@ exports.generateIPFS = async (req, res) => {
             videoId = vimeo_parser(url);
         }
 
-        console.log('prepare download =========>', `yt-dlp -o ./downloads/${videoId}.mp4 "${url}" -f "mp4"`);
         const downloadProcess = exec(`yt-dlp -o ./downloads/${videoId}.mp4 "${url}" -f "mp4"`);
         downloadProcess.stderr.on('data', function (err) {
             if (err && err.includes('WARNING') < 0) {
@@ -1648,9 +1645,7 @@ exports.generateIPFS = async (req, res) => {
             }
         });
         downloadProcess.stdout.on('data', async function (data) {
-            console.log('downloading =========>', data, converting);
             if (data && data.indexOf('has already been downloaded') >= 0) {
-                console.log('download success 222 **********>' + `${videoId}.mp4`);
                 setTimeout(async () => {
                     const addProcess = exec(`ipfs add ./downloads/${videoId}.mp4`);
 
@@ -1688,7 +1683,6 @@ exports.generateIPFS = async (req, res) => {
                     converting[index].percent = percent;
 
                     if (data.indexOf('100%') >= 0) {
-                        console.log('download success **********>', converting[index]);
                         converting[index].percent = '100';
                         converting[index].status = 'uploading';
                         setTimeout(async () => {
