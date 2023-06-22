@@ -920,6 +920,7 @@ exports.Web_uploadContent = (req, res) => {
 
                 let contentID = 0;
                 const status = true;
+                const postdate = new Date();
 
                 if (contentDB != undefined) {
 
@@ -927,11 +928,11 @@ exports.Web_uploadContent = (req, res) => {
                     contentID = Object.keys(curContents).length;
 
                     if (contentID > 0) {
-                        await contentDB.set(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [], channelName: channelName });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: postdate.toString(), comments: {}, followers: [], channelName: channelName });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
 
                     } else {
-                        await contentDB.set(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: new Date(), comments: {}, followers: [], channelName: channelName });
+                        await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: postdate.toString(), comments: {}, followers: [], channelName: channelName });
                         return res.status(200).json({ msg: `uploaded success`, status: true });
                     }
                 } else {
