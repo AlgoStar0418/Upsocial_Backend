@@ -63,7 +63,8 @@ let channelDB; // Channel Management Database
 let playlistDB; // Playlist Management Database
 let anonymouseDB; // Anonoymouse Users Database
 
-// let hashHistories = [];
+let hashHistories = [];
+
 
 let ENCRYPT_PASS = process.env.ENCRYPT_PASS;
 /////////////////////////////////////////////////////////////////////////
@@ -1556,16 +1557,16 @@ exports.generateIPFS = async (req, res) => {
     const { file } = req;
     const ip = req.headers['x-real-ip'] || '';
 
-    // let histories = [];
-    // for (let i = 0; i < hashHistories.length; i++) {
-    //     const jsonData = await axios({
-    //         method: 'get',
-    //         url: `${process.env.IPFS_BASE_URL}/${hashHistories[i].jsonHashCode}`
-    //     });
-    //     if (jsonData && jsonData.data) {
-    //         histories.push(jsonData.data);
-    //     }
-    // }
+    let histories = [];
+    for (let i = 0; i < hashHistories.length; i++) {
+        const jsonData = await axios({
+            method: 'get',
+            url: `${process.env.IPFS_BASE_URL}/${hashHistories[i].jsonHashCode}`
+        });
+        if (jsonData && jsonData.data) {
+            histories.push(jsonData.data);
+        }
+    }
 
     if (file) {
         const addVideoProcess = exec(`ipfs add ./downloads/${file.filename}`);
