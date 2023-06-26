@@ -328,10 +328,13 @@ exports.userRegister = async (req, res) => {
         let userTable = Object.values(curUsers);
         let userEmailTable = [];
         let userExist = false;
+        let userNameTable = [];
+        let userNameExist = false;
 
         if (userId > 0) {
             for (var i = 0; i < userTable.length; i++) {
                 userEmailTable.push(userTable[i]["email"]);
+                userNameTable.push(userTable[i]["username"]);
             }
 
             for (var i = 0; i < userEmailTable.length; i++) {
@@ -340,11 +343,19 @@ exports.userRegister = async (req, res) => {
                 }
             }
 
-            if (!userExist) {
+            for (var i = 0; i < userNameTable.length; i++) {
+                if (userNameTable[i] == username) {
+                    userNameExist = true
+                }
+            }
+
+            if (!userExist && !userNameExist) {
                 await userDataDB.put(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: true, handle: "", description: "", location: "", photo: "", following: [], followers: [], Liked: [], Disliked: [], History: [] });
                 return res.status(200).json({ msg: `${email} is registered success !`, status: true });
-            } else {
+            } else if (userExist) {
                 return res.status(200).json({ msg: `${email} is already registered !`, status: false });
+            } else {
+                return res.status(200).json({ msg: `${username} is same !`, status: false });
             }
         } else {
             await userDataDB.put(userId, { ID: userId, username: username, email: email, password: encrypted_password, status: true, handle: "", description: "", location: "", photo: "", following: [], followers: [], Liked: [], Disliked: [], History: [] });
