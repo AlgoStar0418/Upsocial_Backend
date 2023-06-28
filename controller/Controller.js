@@ -940,8 +940,8 @@ exports.Web_uploadContent = (req, res) => {
                     const tempContents = Object.values(curContents);
                     const lastContentIndex = tempContents.length;
                     console.log("lastContentIndex==>>>>", lastContentIndex)
+                    console.log("lastContentIndex==>>>>", tempContents[lastContentIndex])
                     console.log("lastContentIndex ID==>>>>", tempContents[lastContentIndex]["ID"])
-                    console.log("lastContentIndex ID==>>>>", tempContents[lastContentIndex].ID)
                     contentID = tempContents[lastContentIndex]["ID"] + 1;
 
                     if (contentID > 0) {
