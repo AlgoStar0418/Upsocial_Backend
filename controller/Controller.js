@@ -938,10 +938,7 @@ exports.Web_uploadContent = (req, res) => {
 
                     const curContents = contentDB.all;
                     const tempContents = Object.values(curContents);
-                    const lastContentIndex = tempContents.length;
-                    console.log("lastContentIndex==>>>>", lastContentIndex)
-                    console.log("lastContentIndex==>>>>", tempContents[lastContentIndex])
-                    console.log("lastContentIndex ID==>>>>", tempContents[lastContentIndex]["ID"])
+                    const lastContentIndex = tempContents.length - 1;
                     contentID = tempContents[lastContentIndex]["ID"] + 1;
 
                     if (contentID > 0) {
@@ -2230,7 +2227,7 @@ exports.createPlaylist = async (req, res) => {
                         if (playlistExist) {
                             return res.status(200).json({ msg: `PlayList name is not unique. Choose another name!`, status: false });
                         } else {
-                            let lastindex = playlistsTable.length;
+                            let lastindex = playlistsTable.length - 1;
                             let id = playlistsTable[lastindex]["ID"] + 1;
 
                             await playlistDB.set(id, { ID: id, userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
