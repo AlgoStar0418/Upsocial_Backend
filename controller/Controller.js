@@ -937,7 +937,9 @@ exports.Web_uploadContent = (req, res) => {
                 if (contentDB != undefined) {
 
                     const curContents = contentDB.all;
-                    contentID = Object.keys(curContents).length;
+                    const tempContents = Object.values(curContents);
+                    const lastContentIndex = tempContents.length;
+                    contentID = tempContents[lastContentIndex]["ID"] + 1;
 
                     if (contentID > 0) {
                         await contentDB.put(contentID, { ID: contentID, email: userEmail, title: title, description: description, keyword: keywords, category: category, ipfsUrl: video_src, thumbnail: data.ipfsUrl, status: status, liked: 0, disliked: 0, watched: 0, shared: 0, postDate: postdate.toString(), comments: {}, followers: [], channelName: channelName });
@@ -2225,14 +2227,15 @@ exports.createPlaylist = async (req, res) => {
                         if (playlistExist) {
                             return res.status(200).json({ msg: `PlayList name is not unique. Choose another name!`, status: false });
                         } else {
-                            let id = playlistsTable.length;
+                            let lastindex = playlistsTable.length;
+                            let id = playlistsTable[lastindex]["ID"] + 1;
 
-                            await playlistDB.set(id, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
+                            await playlistDB.set(id, { ID: id, userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
                             return res.status(200).json({ msg: `Creating playlist is success!`, status: true });
                         }
 
                     } else {
-                        await playlistDB.set(0, { userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
+                        await playlistDB.set(0, { ID: 0, userEmail: userEmail, feeds: [], image: data.ipfsUrl, title: playlistTitle, description: playlistDescription, createdDate: createddate.toString() });
                         return res.status(200).json({ msg: `Creating playlist is successful!`, status: true });
                     }
                 } else {
@@ -2381,6 +2384,7 @@ exports.addVideoToPlaylist = async (req, res) => {
 
             if (playlistExist) {
                 await playlistDB.set(playlistID, {
+                    ID: playlistID,
                     userEmail: userEmail,
                     feeds: targetFeeds,
                     image: playlist_image,
@@ -2445,6 +2449,7 @@ exports.removeVideoToPlaylist = async (req, res) => {
 
             if (playlistExist) {
                 await playlistDB.set(playlistID, {
+                    ID: playlistID,
                     userEmail: userEmail,
                     feeds: resultFeeds,
                     image: playlist_image,
