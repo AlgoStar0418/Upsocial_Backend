@@ -1,2 +1,2 @@
 #Upsocial backend API
-#upsocial backend
+#Upsocial Frontend
